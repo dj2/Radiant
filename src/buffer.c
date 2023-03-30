@@ -1,12 +1,14 @@
 #include "src/buffer.h"
 
+#include <stdio.h>
+
 radiant_buffer_t radiant_buffer_create(radiant_buffer_create_request_t req) {
   radiant_buffer_t buffer = {
       .engine = req.engine,
   };
   WGPUBufferDescriptor buffer_descriptor = {
       .label = req.label,
-      .usage = req.usage | radiant_buffer_usage_copy_dst,
+      .usage = req.usage,
       .size = req.size_in_bytes,
   };
   buffer.buffer = wgpuDeviceCreateBuffer(req.engine.device, &buffer_descriptor);

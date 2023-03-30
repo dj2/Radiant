@@ -16,21 +16,34 @@
 #include "src/engine.h"
 #include "src/resource_manager.h"
 #include "src/shader.h"
+#include "src/vec3.h"
 #include "src/window.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-static float vertex_data[] = {
-    // clang-format off
-    //     POS                COLOUR
-     0.0f,  0.5f, 0.0f,    1.f, 0.f, 0.f,
-    -0.5f, -0.5f, 0.0f,    0.f, 1.f, 0.f,
-     0.5f, -0.5f, 0.0f,    0.f, 0.f, 1.f,
-    // clang-format on
+static struct vertices {
+  radiant_vec3_t pos;
+  radiant_vec3_t colour;
+} vertex_data[] = {
+    {
+        .pos = (radiant_vec3_t){0.0f, 0.5f, 0.0f},
+        .colour = (radiant_vec3_t){1.f, 0.f, 0.f},
+    },
+    {
+        .pos = (radiant_vec3_t){-0.5f, -0.5f, 0.0f},
+        .colour = (radiant_vec3_t){0.f, 1.f, 0.f},
+    },
+    {
+        .pos = (radiant_vec3_t){0.5f, -0.5f, 0.0f},
+        .colour = (radiant_vec3_t){0.f, 0.f, 1.f},
+    },
 };
 
 int main() {
+  // Set setderr to unbuffered
+  setvbuf(stderr, NULL, _IONBF, 0);
+
   // TODO(dsinclair): This should probably pull from the build or something
   // instead of using a hard coded `resources` folder.
   radiant_resource_manager_create_result_t manager_result =
@@ -87,10 +100,114 @@ int main() {
   free(shader_data);
   radiant_file_close(shader_file);
 
+  WGPUVertexAttribute vert_attrs[] = {
+      {
+          .format = WGPUVertexFormat_Float32x3,
+          .offset = offsetof(struct vertices, pos),
+          .shaderLocation = 0,
+      },
+      {
+          .format = WGPUVertexFormat_Float32x3,
+          .offset = offsetof(struct vertices, colour),
+          .shaderLocation = 1,
+      },
+  };
+  WGPUVertexBufferLayout vert_buf_layout = {
+      .arrayStride = sizeof(struct vertices),
+      .attributeCount = 2,
+      .attributes = vert_attrs,
+  };
+  WGPUColorTargetState target = {
+      .format = WGPUTextureFormat_BGRA8Unorm,
+      .writeMask = WGPUColorWriteMask_All,
+  };
+  WGPUFragmentState frag_state = {
+      .module = shader.mod,
+      .entryPoint = "fs_main",
+      .targetCount = 1,
+      .targets = &target,
+  };
+
+  WGPURenderPipelineDescriptor pipeline_desc = {
+      .label = "Main Render Pipeline",
+      .primitive =
+          {
+              .topology = WGPUPrimitiveTopology_TriangleList,
+              .frontFace = WGPUFrontFace_CCW,
+              .cullMode = WGPUCullMode_None,
+          },
+      .vertex =
+          {
+              .module = shader.mod,
+              .entryPoint = "vs_main",
+              .bufferCount = 1,
+              .buffers = &vert_buf_layout,
+          },
+      .fragment = &frag_state,
+      .multisample =
+          {
+              .count = 1,
+              .mask = 0xffffffff,
+          },
+  };
+
+  WGPURenderPipeline pipeline =
+      wgpuDeviceCreateRenderPipeline(engine.device, &pipeline_desc);
+
   radiant_shader_destroy(shader);
 
   while (!radiant_window_should_close(window)) {
     radiant_windows_poll_events();
+
+    WGPUCommandEncoderDescriptor cmd_desc = {
+        .label = "Main encoder",
+    };
+    WGPUCommandEncoder encoder =
+        wgpuDeviceCreateCommandEncoder(engine.device, &cmd_desc);
+
+    {
+      WGPUTextureView backbuffer =
+          wgpuSwapChainGetCurrentTextureView(engine.swapchain);
+
+      WGPURenderPassColorAttachment colour_attach = {
+          .view = backbuffer,
+          .loadOp = WGPULoadOp_Clear,
+          .storeOp = WGPUStoreOp_Store,
+          .clearValue =
+              {
+                  .r = .2,
+                  .g = .2,
+                  .b = .2,
+                  .a = 1.,
+              },
+      };
+
+      WGPURenderPassDescriptor pass_desc = {
+          .label = "Render pass",
+          .colorAttachmentCount = 1,
+          .colorAttachments = &colour_attach,
+      };
+
+      WGPURenderPassEncoder pass =
+          wgpuCommandEncoderBeginRenderPass(encoder, &pass_desc);
+
+      wgpuRenderPassEncoderSetPipeline(pass, pipeline);
+      wgpuRenderPassEncoderSetVertexBuffer(pass, 0, vertex_buffer.buffer, 0,
+                                           WGPU_WHOLE_SIZE);
+      wgpuRenderPassEncoderDraw(pass, 3, 1, 0, 0);
+      wgpuRenderPassEncoderEnd(pass);
+
+      wgpuRenderPassEncoderRelease(pass);
+    }
+
+    WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, NULL);
+    wgpuCommandEncoderRelease(encoder);
+
+    WGPUQueue queue = wgpuDeviceGetQueue(engine.device);
+    wgpuQueueSubmit(queue, 1, &commands);
+    wgpuCommandBufferRelease(commands);
+
+    wgpuSwapChainPresent(engine.swapchain);
   }
 
   radiant_buffer_destroy(vertex_buffer);
