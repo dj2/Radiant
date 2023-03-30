@@ -157,8 +157,7 @@ radiant_engine_create_result_t radiant_engine_create(radiant_window_t window) {
 
   wgpuDeviceSetUncapturedErrorCallback(engine->device,
                                        uncaptured_error_callback, NULL);
-  wgpuDeviceSetDeviceLostCallback(engine->device, device_lost_callback,
-                                  NULL);
+  wgpuDeviceSetDeviceLostCallback(engine->device, device_lost_callback, NULL);
   wgpuDeviceSetLoggingCallback(engine->device, logging_callback, NULL);
 
   radiant_surface_descriptor_t chain_surface_descriptor =

@@ -14,8 +14,11 @@
 
 add_library(libradiant "")
 target_sources(libradiant PRIVATE
+  array_element_count.h
   assert.c
   assert.h
+  buffer.c
+  buffer.h
   engine.c
   engine.h
   equal.c
@@ -29,6 +32,10 @@ target_sources(libradiant PRIVATE
   pad.h
   point3.c
   point3.h
+  resource_manager.c
+  resource_manager.h
+  shader.c
+  shader.h
   time.c
   time.h
   vec2.c

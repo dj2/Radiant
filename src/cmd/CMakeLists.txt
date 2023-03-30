@@ -16,3 +16,5 @@ add_executable(radiant "")
 target_sources(radiant PRIVATE main.c)
 radiant_compile_options(radiant)
 target_link_libraries(radiant radiant::lib)
+
+radiant_add_shader(radiant pass_through.wgsl)

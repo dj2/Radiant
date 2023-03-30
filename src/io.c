@@ -24,7 +24,7 @@
 radiant_file_result_t radiant_file_open(const char* path) {
   RADIANT_ASSERT(path);
 
-  FILE* file = fopen(path, "w+");
+  FILE* file = fopen(path, "r+");
   if (!file) {
     return (radiant_file_result_t){0};
   }
@@ -39,7 +39,7 @@ radiant_file_result_t radiant_file_mem_open(void* buf, uint32_t len) {
   RADIANT_ASSERT(buf);
   RADIANT_ASSERT(len > 0);
 
-  FILE* dest = fmemopen(buf, len, "w+");
+  FILE* dest = fmemopen(buf, len, "r+");
   if (!dest) {
     return (radiant_file_result_t){0};
   }
@@ -51,15 +51,13 @@ radiant_file_result_t radiant_file_mem_open(void* buf, uint32_t len) {
                                  }};
 }
 
-void radiant_file_close(radiant_file_t* file) {
-  RADIANT_ASSERT(file);
-  RADIANT_ASSERT(file->open);
+void radiant_file_close(radiant_file_t file) {
+  RADIANT_ASSERT(file.open);
 
-  FILE* handle = (FILE*)file->handle;
+  FILE* handle = (FILE*)file.handle;
   if (fclose(handle) != 0) {
     RADIANT_UNREACHABLE();
   }
-  file->open = false;
 }
 
 void radiant_file_seek(radiant_file_t file, int32_t pos) {
@@ -71,7 +69,7 @@ void radiant_file_seek(radiant_file_t file, int32_t pos) {
   }
 }
 
-int64_t radiant_file_size(radiant_file_t file) {
+uint64_t radiant_file_size(radiant_file_t file) {
   RADIANT_ASSERT(file.open);
 
   FILE* handle = (FILE*)file.handle;
@@ -79,10 +77,16 @@ int64_t radiant_file_size(radiant_file_t file) {
   if (fgetpos(handle, &cur) != 0) {
     RADIANT_UNREACHABLE();
   }
-  if (fseek(handle, SEEK_END, 0) != 0) {
+  if (fseek(handle, 0, SEEK_END) != 0) {
     RADIANT_UNREACHABLE();
   }
-  int64_t size = ftell(handle);
+
+  int64_t s = ftell(handle);
+  if (s < 0) {
+    RADIANT_UNREACHABLE();
+  }
+
+  uint64_t size = (uint64_t)s;
   if (fsetpos(handle, &cur) != 0) {
     RADIANT_UNREACHABLE();
   }

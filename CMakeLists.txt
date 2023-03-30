@@ -97,6 +97,13 @@ function(radiant_compile_options TARGET)
   endif()
 endfunction()
 
+function(radiant_add_shader TARGET SHADER)
+  add_custom_command(TARGET ${TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${PROJECT_SOURCE_DIR}/resources/shaders/${SHADER}
+            ${PROJECT_BINARY_DIR}/resources/shaders/${SHADER})
+endfunction()
+
 add_subdirectory(third_party)
 add_subdirectory(src)
 add_subdirectory(src/cmd)

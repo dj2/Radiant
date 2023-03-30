@@ -49,13 +49,13 @@ radiant_file_result_t radiant_file_mem_open(void* buf, uint32_t len);
 
 /// Closes the |file| handle.
 /// Note: |file| must not be used after closed.
-void radiant_file_close(radiant_file_t* file);
+void radiant_file_close(radiant_file_t file);
 
 /// Seeks |file| to |pos|.
 void radiant_file_seek(radiant_file_t file, int32_t pos);
 
 /// Returns the size of |file|.
-int64_t radiant_file_size(radiant_file_t file);
+uint64_t radiant_file_size(radiant_file_t file);
 
 /// Reads |size| bytes from |file| into |buffer|. Returning true if |size| bytes
 /// were read. Note: |buffer| must not be a nullptr.
