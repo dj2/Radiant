@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <stdbool.h>
+
 #define radiant_equal(A, B) \
   _Generic((B), double: radiant_equal_double, float: radiant_equal_float)(A, B)
 

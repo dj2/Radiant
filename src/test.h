@@ -23,7 +23,7 @@
 void radiant_suite_begin(const char* name);
 
 /// Ends a test suite returning 0 if the suite passed
-int radiant_suite_end();
+int radiant_suite_end(void);
 
 /// Prototype of a test method
 typedef bool (*radiant_test_t)(void);

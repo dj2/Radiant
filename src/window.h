@@ -17,6 +17,8 @@
 #include "src/glfw.h"
 #include "src/pad.h"
 
+#include <stdbool.h>
+
 /// A window
 typedef struct radiant_window_t {
   GLFWwindow* glfw_window;
@@ -33,17 +35,17 @@ typedef struct radiant_window_create_result_t {
 } radiant_window_create_result_t;
 
 /// Initializes the window system
-bool radiant_windows_initialize();
+bool radiant_windows_initialize(void);
 /// Shuts down the window system
-void radiant_windows_shutdown();
+void radiant_windows_shutdown(void);
+
+/// Polls the window system for new events
+void radiant_windows_poll_events(void);
 
 /// Creates a new window
-radiant_window_create_result_t radiant_window_create();
+radiant_window_create_result_t radiant_window_create(void);
 /// Destroys a window
 void radiant_window_destroy(radiant_window_t window);
 
 /// Returns true if |window| should close
 bool radiant_window_should_close(radiant_window_t window);
-
-/// Polls the window system for new events
-void radiant_windows_poll_events();

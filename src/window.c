@@ -34,6 +34,10 @@ void radiant_windows_shutdown() {
   glfwTerminate();
 }
 
+void radiant_windows_poll_events() {
+  glfwPollEvents();
+}
+
 radiant_window_create_result_t radiant_window_create() {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
@@ -44,7 +48,7 @@ radiant_window_create_result_t radiant_window_create() {
   };
   radiant_window_t* window = &result.window;
   window->glfw_window =
-      glfwCreateWindow(1024, 768, "radiant", nullptr, nullptr);
+      glfwCreateWindow(1024, 768, "radiant", NULL, NULL);
   if (!window->glfw_window) {
     fprintf(stderr, "Failed to create window\n");
     result.succeeded = false;
@@ -59,8 +63,4 @@ void radiant_window_destroy(radiant_window_t window) {
 
 bool radiant_window_should_close(radiant_window_t window) {
   return glfwWindowShouldClose(window.glfw_window);
-}
-
-void radiant_windows_poll_events() {
-  glfwPollEvents();
 }

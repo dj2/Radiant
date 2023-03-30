@@ -25,6 +25,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 set(CMAKE_C_STANDARD 23)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
   message(STATUS "No build type selected, default to Debug")
   set(CMAKE_BUILD_TYPE "Debug")
@@ -77,16 +79,20 @@ function(radiant_compile_options TARGET)
 
     -Wno-declaration-after-statement
     -Wno-pre-c2x-compat
-    -Wno-unsafe-buffer-usage
   )
 
   if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR
       "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
     target_compile_options(${TARGET} PRIVATE
       -Weverything
-      -Wno-documentation-unknown-command
       -Wno-c99-extensions
+      -Wno-documentation-unknown-command
       -Wno-pre-c++20-compat-pedantic
+    )
+  endif()
+  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    target_compile_options(${TARGET} PRIVATE
+      -Wno-unsafe-buffer-usage
     )
   endif()
 endfunction()
