@@ -51,6 +51,7 @@ static void uncaptured_error_callback(WGPUErrorType type,
     case WGPUErrorType_Force32:
       break;
   }
+  fflush(stderr);
 }
 
 /// Callback when device is lost
@@ -69,6 +70,7 @@ static void device_lost_callback(WGPUDeviceLostReason reason,
     case WGPUDeviceLostReason_Force32:
       break;
   }
+  fflush(stderr);
 }
 
 /// Logging callback
@@ -91,6 +93,7 @@ static void logging_callback(WGPULoggingType type,
     case WGPULoggingType_Force32:
       break;
   }
+  fflush(stderr);
 }
 
 /// Callback when requesting an adapter

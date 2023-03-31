@@ -47,8 +47,7 @@ radiant_window_create_result_t radiant_window_create() {
       .succeeded = true,
   };
   radiant_window_t* window = &result.window;
-  window->glfw_window =
-      glfwCreateWindow(1024, 768, "radiant", NULL, NULL);
+  window->glfw_window = glfwCreateWindow(1024, 768, "radiant", NULL, NULL);
   if (!window->glfw_window) {
     fprintf(stderr, "Failed to create window\n");
     result.succeeded = false;

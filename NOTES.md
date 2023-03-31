@@ -41,15 +41,6 @@ a bit of hoop jumping (although the code is pretty much all boiler
 plate).
 
 ## Object life times
-
-### Returned objects
-Unsure of the life times of objects. Wasn't sure if a `Retain` was
-required after something like a `wgpuCreateInstance` call
-
-#### Resolved
-kangz confirmed it is not required to `Retain` on creation as the
-objects are retained by default.
-
 ### Other lifetimes
 What is the lifetime of things like strings passed in for labels? Just
 the call, life of adapter?
@@ -58,3 +49,27 @@ the call, life of adapter?
 Some objects currently accept a `label` in the descriptor, but have no
 `SetLabel` method. Was initially confused as I was doing `SetLabel` all
 the time and it didn't always compile.
+
+## Zero initialzing can lead to nothing rendering.
+Zero initializing structs, have to be very careful about default values, things like `multisample`
+or the `ColorTargetState` `WriteMask` cause problems. At least with `multisample` a validation error
+is generated. With `WriteMask` set to `0` nothing renders.
+
+# Resolved
+
+## Unhandled error timing
+It seems like unhandled error is only emitted on shutdown when all the output gets emitted. So,
+shader compilation errors are not seen until the program is terminated without using a error scope.
+
+### wgpuInstanceProcessEvents
+`enga` pointed out that events are only processed when `wgpuInstanceProcessEvents` is called.
+
+## Object life times
+### Returned objects
+Unsure of the life times of objects. Wasn't sure if a `Retain` was
+required after something like a `wgpuCreateInstance` call
+
+#### Resolved
+kangz confirmed it is not required to `Retain` on creation as the
+objects are retained by default.
+

@@ -41,9 +41,6 @@ static struct vertices {
 };
 
 int main() {
-  // Set setderr to unbuffered
-  setvbuf(stderr, NULL, _IONBF, 0);
-
   // TODO(dsinclair): This should probably pull from the build or something
   // instead of using a hard coded `resources` folder.
   radiant_resource_manager_create_result_t manager_result =
@@ -79,26 +76,13 @@ int main() {
   radiant_buffer_t vertex_buffer =
       radiant_buffer_create_with_data(vertex_buffer_req, vertex_data);
 
-  radiant_file_result_t shader_file_result =
-      radiant_resource_manager_open(manager, "shaders/pass_through.wgsl");
-  if (!shader_file_result.succeeded) {
-    fprintf(stderr, "Unable to load pass_through shader");
+  radiant_shader_create_result_t shader_result =
+      radiant_shader_create_from_file(engine, manager, "Passthrough shader",
+                                      "shaders/pass_through.wgsl");
+  if (!shader_result.succeeded) {
     return 1;
   }
-
-  radiant_file_t shader_file = shader_file_result.file;
-  uint64_t shader_file_size = radiant_file_size(shader_file);
-
-  char* shader_data = (char*)malloc((uint32_t)shader_file_size);
-  if (!radiant_file_read(shader_file, shader_data, shader_file_size)) {
-    fprintf(stderr, "Failed to read shader file");
-    return 1;
-  }
-
-  radiant_shader_t shader =
-      radiant_shader_create(engine, "Passthrough shader", shader_data);
-  free(shader_data);
-  radiant_file_close(shader_file);
+  radiant_shader_t shader = shader_result.shader;
 
   WGPUVertexAttribute vert_attrs[] = {
       {
@@ -209,6 +193,8 @@ int main() {
 
     wgpuSwapChainPresent(engine.swapchain);
   }
+
+  wgpuRenderPipelineRelease(pipeline);
 
   radiant_buffer_destroy(vertex_buffer);
   radiant_engine_destroy(engine);
