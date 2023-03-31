@@ -143,6 +143,8 @@ int main() {
   while (!radiant_window_should_close(window)) {
     radiant_windows_poll_events();
 
+    wgpuInstanceProcessEvents(engine.instance);
+
     WGPUCommandEncoderDescriptor cmd_desc = {
         .label = "Main encoder",
     };
