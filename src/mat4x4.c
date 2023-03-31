@@ -41,10 +41,10 @@ radiant_mat4x4_t radiant_mat4x4_look_at(radiant_vec3_t eye,
   return (radiant_mat4x4_t){
       // clang-format off
       .data = {
-          x.x, x.y, x.z, -eye.x,
-          y.x, y.y, y.z, -eye.y,
-          -z.x, -z.y, -z.z, -eye.z,
-          0.f, 0.f, 0.f, 1.f,
+             x.x,    y.x,   -z.x, 0.f,
+             x.y,    y.y,   -z.y, 0.f,
+             x.z,    y.z,   -z.z, 0.f,
+          -eye.x, -eye.y, -eye.z, 1.f,
       },
       // clang-format on
   };
@@ -54,16 +54,16 @@ radiant_mat4x4_t radiant_mat4x4_perspective(float fov_y_radians,
                                             float aspect,
                                             float near,
                                             float far) {
-  float tan_half_fov_y = tanf(fov_y_radians / 2);
-  float dist = far - near;
+  float tan_half_fov_y = 1.f / tanf(fov_y_radians / 2);
+  float nf = 1.f / (near - far);
 
   return (radiant_mat4x4_t){
       // clang-format off
       .data = {
           tan_half_fov_y / aspect, 0.f, 0.f, 0.f,
           0.f, tan_half_fov_y, 0.f, 0.f,
-          0.f, 0.f, (far + near) / dist, (2.f * far * near) / dist,
-          0.f, 0.f, -1.f, 0.f,
+          0.f, 0.f, (far + near) * nf, -1,
+          0.f, 0.f, 2 * far * near * nf, 0.f,
       },
       // clang-format on
   };
@@ -74,8 +74,8 @@ radiant_mat4x4_t radiant_mat4x4_rotate_x(float angle_radians) {
       // clang-format off
       .data = {
           1.f, 0.f, 0.f, 0.f,
-          0.f, cosf(angle_radians), -sinf(angle_radians), 0.f,
-          0.f, sinf(angle_radians), cosf(angle_radians), 0.f,
+          0.f, cosf(angle_radians), sinf(angle_radians), 0.f,
+          0.f, -sinf(angle_radians), cosf(angle_radians), 0.f,
           0.f, 0.f, 0.f, 1.f,
       },
       // clang-format on
@@ -86,9 +86,9 @@ radiant_mat4x4_t radiant_mat4x4_rotate_y(float angle_radians) {
   return (radiant_mat4x4_t){
       // clang-format off
       .data = {
-          cosf(angle_radians), 0.f, sinf(angle_radians), 0.f,
+          cosf(angle_radians), 0.f, -sinf(angle_radians), 0.f,
           0.f, 1.f, 0.f, 0.f,
-          -sinf(angle_radians), 0.f, cosf(angle_radians), 0.f,
+          sinf(angle_radians), 0.f, cosf(angle_radians), 0.f,
           0.f, 0.f, 0.f, 1.f,
       },
       // clang-format on
@@ -99,8 +99,8 @@ radiant_mat4x4_t radiant_mat4x4_rotate_z(float angle_radians) {
   return (radiant_mat4x4_t){
       // clang-format off
       .data = {
-          cosf(angle_radians), -sinf(angle_radians), 0.f, 0.f,
-          sinf(angle_radians), cosf(angle_radians), 0.f, 0.f,
+          cosf(angle_radians), sinf(angle_radians), 0.f, 0.f,
+          -sinf(angle_radians), cosf(angle_radians), 0.f, 0.f,
           0.f, 0.f, 1.f, 0.f,
           0.f, 0.f, 0.f, 1.f,
       },
@@ -110,18 +110,17 @@ radiant_mat4x4_t radiant_mat4x4_rotate_z(float angle_radians) {
 
 radiant_mat4x4_t radiant_mat4x4_translate(radiant_vec3_t v) {
   radiant_mat4x4_t m = radiant_mat4x4_identity();
-  m.data[3] = v.x;
-  m.data[7] = v.y;
-  m.data[11] = v.z;
+  m.data[12] = v.x;
+  m.data[13] = v.y;
+  m.data[14] = v.z;
   return m;
 }
 
 radiant_mat4x4_t radiant_mat4x4_scale(float x, float y, float z) {
-  radiant_mat4x4_t m = {0};
+  radiant_mat4x4_t m = radiant_mat4x4_identity();
   m.data[0] = x;
   m.data[5] = y;
   m.data[10] = z;
-  m.data[15] = 1.0f;
   return m;
 }
 
@@ -140,14 +139,14 @@ radiant_mat4x4_t radiant_mat4x4_transpose(radiant_mat4x4_t m) {
 
 radiant_mat4x4_t radiant_mat4x4_mul_mat4x4(radiant_mat4x4_t m,
                                            radiant_mat4x4_t b) {
-  radiant_mat4x4_t r = {0};
+  radiant_mat4x4_t r = radiant_mat4x4_identity();
   for (uint32_t i = 0; i < 4; ++i) {
     uint32_t row = i * 4;
     for (uint32_t j = 0; j < 4; ++j) {
-      r.data[row + j] = (m.data[row + 0] * b.data[j + 0]) +
-                        (m.data[row + 1] * b.data[j + 4]) +
-                        (m.data[row + 2] * b.data[j + 8]) +
-                        (m.data[row + 3] * b.data[j + 12]);
+      r.data[i + (j * 4)] = (m.data[j + 0] * b.data[row + 0]) +
+                            (m.data[j + 4] * b.data[row + 1]) +
+                            (m.data[j + 8] * b.data[row + 2]) +
+                            (m.data[j + 12] * b.data[row + 3]);
     }
   }
   return r;
@@ -155,10 +154,10 @@ radiant_mat4x4_t radiant_mat4x4_mul_mat4x4(radiant_mat4x4_t m,
 
 radiant_point3_t radiant_mat4x4_mul_point3(radiant_mat4x4_t m,
                                            radiant_point3_t p) {
-  float x = m.data[0] * p.x + m.data[1] * p.y + m.data[2] * p.z + m.data[3];
-  float y = m.data[4] * p.x + m.data[5] * p.y + m.data[6] * p.z + m.data[7];
-  float z = m.data[8] * p.x + m.data[9] * p.y + m.data[10] * p.z + m.data[11];
-  float w = m.data[12] * p.x + m.data[13] * p.y + m.data[14] * p.z + m.data[15];
+  float x = m.data[0] * p.x + m.data[4] * p.y + m.data[8] * p.z + m.data[12];
+  float y = m.data[1] * p.x + m.data[5] * p.y + m.data[9] * p.z + m.data[13];
+  float z = m.data[2] * p.x + m.data[6] * p.y + m.data[10] * p.z + m.data[14];
+  float w = m.data[3] * p.x + m.data[7] * p.y + m.data[11] * p.z + m.data[15];
 
   if (radiant_equal(w, 1.0f)) {
     return (radiant_point3_t){
@@ -178,9 +177,9 @@ radiant_point3_t radiant_mat4x4_mul_point3(radiant_mat4x4_t m,
 
 radiant_vec3_t radiant_mat4x4_mul_vec3(radiant_mat4x4_t m, radiant_vec3_t v) {
   return (radiant_vec3_t){
-      .x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z,
-      .y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z,
-      .z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z,
+      .x = m.data[0] * v.x + m.data[4] * v.y + m.data[8] * v.z,
+      .y = m.data[1] * v.x + m.data[5] * v.y + m.data[9] * v.z,
+      .z = m.data[2] * v.x + m.data[6] * v.y + m.data[10] * v.z,
   };
 }
 

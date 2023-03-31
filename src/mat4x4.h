@@ -19,7 +19,7 @@
 #include "src/point3.h"
 #include "src/vec3.h"
 
-/// A 4x4 matrix in row-major order.
+/// A 4x4 matrix in column-major order.
 typedef struct radiant_mat4x4_t {
   /// Matrix data.
   ///
@@ -29,7 +29,7 @@ typedef struct radiant_mat4x4_t {
   /// | m n o p |
   ///
   /// Stored as:
-  /// [a b c d e f g h i j k l m n o p]
+  /// [a e i m b f j n c g k o d h l p]
   ///
   float data[16];
 } radiant_mat4x4_t;

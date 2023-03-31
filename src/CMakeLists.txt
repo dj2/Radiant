@@ -19,6 +19,8 @@ target_sources(libradiant PRIVATE
   assert.h
   buffer.c
   buffer.h
+  colour3.h
+  constants.h
   engine.c
   engine.h
   equal.c

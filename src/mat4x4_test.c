@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/mat4x4.h"
+#include "src/constants.h"
 #include "src/test.h"
 
 static bool identity() {
@@ -46,48 +47,49 @@ static bool look_at() {
       (radiant_vec3_t){0.0f, 1.0f, 0.0f});
 
   RADIANT_EXPECT_FLOAT_EQ(-0.707107f, radiant_mat4x4_get(m, 0));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 1));
-  RADIANT_EXPECT_FLOAT_EQ(-0.707107f, radiant_mat4x4_get(m, 2));
-  RADIANT_EXPECT_FLOAT_EQ(-2.000000f, radiant_mat4x4_get(m, 3));
+  RADIANT_EXPECT_FLOAT_EQ(-0.40824831f, radiant_mat4x4_get(m, 1));
+  RADIANT_EXPECT_FLOAT_EQ(-0.577350f, radiant_mat4x4_get(m, 2));
+  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 3));
 
-  RADIANT_EXPECT_FLOAT_EQ(-0.40824831f, radiant_mat4x4_get(m, 4));
+  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 4));
   RADIANT_EXPECT_FLOAT_EQ(0.81649661f, radiant_mat4x4_get(m, 5));
-  RADIANT_EXPECT_FLOAT_EQ(0.40824831f, radiant_mat4x4_get(m, 6));
-  RADIANT_EXPECT_FLOAT_EQ(-2.000000f, radiant_mat4x4_get(m, 7));
+  RADIANT_EXPECT_FLOAT_EQ(-0.577350f, radiant_mat4x4_get(m, 6));
+  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 7));
 
-  RADIANT_EXPECT_FLOAT_EQ(-0.577350f, radiant_mat4x4_get(m, 8));
-  RADIANT_EXPECT_FLOAT_EQ(-0.577350f, radiant_mat4x4_get(m, 9));
+  RADIANT_EXPECT_FLOAT_EQ(-0.707107f, radiant_mat4x4_get(m, 8));
+  RADIANT_EXPECT_FLOAT_EQ(0.40824831f, radiant_mat4x4_get(m, 9));
   RADIANT_EXPECT_FLOAT_EQ(0.577350f, radiant_mat4x4_get(m, 10));
-  RADIANT_EXPECT_FLOAT_EQ(2.000000f, radiant_mat4x4_get(m, 11));
+  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 11));
 
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 12));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 13));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 14));
+  RADIANT_EXPECT_FLOAT_EQ(-2.f, radiant_mat4x4_get(m, 12));
+  RADIANT_EXPECT_FLOAT_EQ(-2.f, radiant_mat4x4_get(m, 13));
+  RADIANT_EXPECT_FLOAT_EQ(2.f, radiant_mat4x4_get(m, 14));
   RADIANT_EXPECT_FLOAT_EQ(1.0f, radiant_mat4x4_get(m, 15));
   return true;
 }
 
 static bool perspective() {
-  radiant_mat4x4_t m = radiant_mat4x4_perspective(45.0f, 0.75f, 0.1f, 1.5f);
+  radiant_mat4x4_t m = radiant_mat4x4_perspective(45.0f * (RADIANT_PI / 180.f),
+                                                  640.f / 480.f, 0.1f, 200.f);
 
-  RADIANT_EXPECT_FLOAT_EQ(0.74380231f, radiant_mat4x4_get(m, 0));
+  RADIANT_EXPECT_FLOAT_EQ(1.81066f, radiant_mat4x4_get(m, 0));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 1));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 2));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 3));
 
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 4));
-  RADIANT_EXPECT_FLOAT_EQ(0.55785173f, radiant_mat4x4_get(m, 5));
+  RADIANT_EXPECT_FLOAT_EQ(2.414213f, radiant_mat4x4_get(m, 5));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 6));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 7));
 
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 8));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 9));
-  RADIANT_EXPECT_FLOAT_EQ(1.142857f, radiant_mat4x4_get(m, 10));
-  RADIANT_EXPECT_FLOAT_EQ(0.21428572f, radiant_mat4x4_get(m, 11));
+  RADIANT_EXPECT_FLOAT_EQ(-1.001f, radiant_mat4x4_get(m, 10));
+  RADIANT_EXPECT_FLOAT_EQ(-1.f, radiant_mat4x4_get(m, 11));
 
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 12));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 13));
-  RADIANT_EXPECT_FLOAT_EQ(-1.0f, radiant_mat4x4_get(m, 14));
+  RADIANT_EXPECT_FLOAT_EQ(-0.2001f, radiant_mat4x4_get(m, 14));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 15));
   return true;
 }
@@ -102,11 +104,11 @@ static bool rotate_x() {
 
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 4));
   RADIANT_EXPECT_FLOAT_EQ(0.52532196f, radiant_mat4x4_get(m, 5));
-  RADIANT_EXPECT_FLOAT_EQ(-0.85090351f, radiant_mat4x4_get(m, 6));
+  RADIANT_EXPECT_FLOAT_EQ(0.85090351f, radiant_mat4x4_get(m, 6));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 7));
 
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 8));
-  RADIANT_EXPECT_FLOAT_EQ(0.85090351f, radiant_mat4x4_get(m, 9));
+  RADIANT_EXPECT_FLOAT_EQ(-0.85090351f, radiant_mat4x4_get(m, 9));
   RADIANT_EXPECT_FLOAT_EQ(0.52532196f, radiant_mat4x4_get(m, 10));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 11));
 
@@ -122,7 +124,7 @@ static bool rotate_y() {
 
   RADIANT_EXPECT_FLOAT_EQ(0.52532196f, radiant_mat4x4_get(m, 0));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 1));
-  RADIANT_EXPECT_FLOAT_EQ(0.85090351f, radiant_mat4x4_get(m, 2));
+  RADIANT_EXPECT_FLOAT_EQ(-0.85090351f, radiant_mat4x4_get(m, 2));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 3));
 
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 4));
@@ -130,7 +132,7 @@ static bool rotate_y() {
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 6));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 7));
 
-  RADIANT_EXPECT_FLOAT_EQ(-0.85090351f, radiant_mat4x4_get(m, 8));
+  RADIANT_EXPECT_FLOAT_EQ(0.85090351f, radiant_mat4x4_get(m, 8));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 9));
   RADIANT_EXPECT_FLOAT_EQ(0.52532196f, radiant_mat4x4_get(m, 10));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 11));
@@ -146,11 +148,11 @@ static bool rotate_z() {
   radiant_mat4x4_t m = radiant_mat4x4_rotate_z(45.0f);
 
   RADIANT_EXPECT_FLOAT_EQ(0.52532196f, radiant_mat4x4_get(m, 0));
-  RADIANT_EXPECT_FLOAT_EQ(-0.85090351f, radiant_mat4x4_get(m, 1));
+  RADIANT_EXPECT_FLOAT_EQ(0.85090351f, radiant_mat4x4_get(m, 1));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 2));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 3));
 
-  RADIANT_EXPECT_FLOAT_EQ(0.85090351f, radiant_mat4x4_get(m, 4));
+  RADIANT_EXPECT_FLOAT_EQ(-0.85090351f, radiant_mat4x4_get(m, 4));
   RADIANT_EXPECT_FLOAT_EQ(0.52532196f, radiant_mat4x4_get(m, 5));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 6));
   RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 7));
@@ -168,23 +170,14 @@ static bool rotate_z() {
 }
 
 static bool transpose() {
-  radiant_mat4x4_t m = {0};
-  radiant_mat4x4_set(&m, 0, 1.f);
-  radiant_mat4x4_set(&m, 1, 2.f);
-  radiant_mat4x4_set(&m, 2, 3.f);
-  radiant_mat4x4_set(&m, 3, 4.f);
-  radiant_mat4x4_set(&m, 4, 5.f);
-  radiant_mat4x4_set(&m, 5, 6.f);
-  radiant_mat4x4_set(&m, 6, 7.f);
-  radiant_mat4x4_set(&m, 7, 8.f);
-  radiant_mat4x4_set(&m, 8, 9.f);
-  radiant_mat4x4_set(&m, 9, 10.f);
-  radiant_mat4x4_set(&m, 10, 11.f);
-  radiant_mat4x4_set(&m, 11, 12.f);
-  radiant_mat4x4_set(&m, 12, 13.f);
-  radiant_mat4x4_set(&m, 13, 14.f);
-  radiant_mat4x4_set(&m, 14, 15.f);
-  radiant_mat4x4_set(&m, 15, 16.f);
+  radiant_mat4x4_t m = {
+      // clang-format off
+       1.f,  2.f,  3.f,  4.f,
+       5.f,  6.f,  7.f,  8.f,
+       9.f, 10.f, 11.f, 12.f,
+      13.f, 14.f, 15.f, 16.f,
+      // clang-format on
+  };
 
   radiant_mat4x4_t t = radiant_mat4x4_transpose(m);
   RADIANT_EXPECT_FLOAT_EQ(1.0f, radiant_mat4x4_get(t, 0));
@@ -207,41 +200,30 @@ static bool transpose() {
 }
 
 static bool mul() {
-  radiant_mat4x4_t a = {0};
-  radiant_mat4x4_set(&a, 0, 1.f);
-  radiant_mat4x4_set(&a, 1, 2.f);
-  radiant_mat4x4_set(&a, 2, 3.f);
-  radiant_mat4x4_set(&a, 3, 4.f);
-  radiant_mat4x4_set(&a, 4, 5.f);
-  radiant_mat4x4_set(&a, 5, 6.f);
-  radiant_mat4x4_set(&a, 6, 7.f);
-  radiant_mat4x4_set(&a, 7, 8.f);
-  radiant_mat4x4_set(&a, 8, 9.f);
-  radiant_mat4x4_set(&a, 9, 10.f);
-  radiant_mat4x4_set(&a, 10, 11.f);
-  radiant_mat4x4_set(&a, 11, 12.f);
-  radiant_mat4x4_set(&a, 12, 13.f);
-  radiant_mat4x4_set(&a, 13, 14.f);
-  radiant_mat4x4_set(&a, 14, 15.f);
-  radiant_mat4x4_set(&a, 15, 16.f);
+  // clang-format off
+  // Matrix is column-major so in memory appears as:
+  //  1 5  9 13
+  //  2 6 10 14
+  //  3 7 11 15
+  //  4 8 12 16
+  // clang-format on
+  radiant_mat4x4_t a = {
+      // clang-format off
+      1.f, 5.f,  9.f, 13.f,
+      2.f, 6.f, 10.f, 14.f,
+      3.f, 7.f, 11.f, 15.f,
+      4.f, 8.f, 12.f, 16.f,
+      // clang-format on
+  };
 
-  radiant_mat4x4_t b = {0};
-  radiant_mat4x4_set(&b, 0, 1.f);
-  radiant_mat4x4_set(&b, 1, 2.f);
-  radiant_mat4x4_set(&b, 2, 3.f);
-  radiant_mat4x4_set(&b, 3, 4.f);
-  radiant_mat4x4_set(&b, 4, 5.f);
-  radiant_mat4x4_set(&b, 5, 6.f);
-  radiant_mat4x4_set(&b, 6, 7.f);
-  radiant_mat4x4_set(&b, 7, 8.f);
-  radiant_mat4x4_set(&b, 8, 9.f);
-  radiant_mat4x4_set(&b, 9, 10.f);
-  radiant_mat4x4_set(&b, 10, 11.f);
-  radiant_mat4x4_set(&b, 11, 12.f);
-  radiant_mat4x4_set(&b, 12, 13.f);
-  radiant_mat4x4_set(&b, 13, 14.f);
-  radiant_mat4x4_set(&b, 14, 15.f);
-  radiant_mat4x4_set(&b, 15, 16.f);
+  radiant_mat4x4_t b = {
+      // clang-format off
+      1.f, 5.f,  9.f, 13.f,
+      2.f, 6.f, 10.f, 14.f,
+      3.f, 7.f, 11.f, 15.f,
+      4.f, 8.f, 12.f, 16.f,
+      // clang-format on
+  };
 
   radiant_mat4x4_t t = radiant_mat4x4_mul(a, b);
   RADIANT_EXPECT_FLOAT_EQ((1 * 1) + (2 * 5) + (3 * 9) + (4 * 13),
@@ -308,25 +290,25 @@ static bool translate() {
   radiant_vec3_t a = (radiant_vec3_t){2.4f, -3.4f, 10.9f};
   radiant_mat4x4_t m = radiant_mat4x4_translate(a);
 
-  RADIANT_EXPECT_FLOAT_EQ(1.0f, radiant_mat4x4_get(m, 0));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 1));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 2));
-  RADIANT_EXPECT_FLOAT_EQ(2.4f, radiant_mat4x4_get(m, 3));
+  RADIANT_EXPECT_FLOAT_EQ(1.f, radiant_mat4x4_get(m, 0));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 1));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 2));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 3));
 
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 4));
-  RADIANT_EXPECT_FLOAT_EQ(1.0f, radiant_mat4x4_get(m, 5));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 6));
-  RADIANT_EXPECT_FLOAT_EQ(-3.4f, radiant_mat4x4_get(m, 7));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 4));
+  RADIANT_EXPECT_FLOAT_EQ(1.f, radiant_mat4x4_get(m, 5));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 6));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 7));
 
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 8));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 9));
-  RADIANT_EXPECT_FLOAT_EQ(1.0f, radiant_mat4x4_get(m, 10));
-  RADIANT_EXPECT_FLOAT_EQ(10.9f, radiant_mat4x4_get(m, 11));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 8));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 9));
+  RADIANT_EXPECT_FLOAT_EQ(1.f, radiant_mat4x4_get(m, 10));
+  RADIANT_EXPECT_FLOAT_EQ(0.f, radiant_mat4x4_get(m, 11));
 
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 12));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 13));
-  RADIANT_EXPECT_FLOAT_EQ(0.0f, radiant_mat4x4_get(m, 14));
-  RADIANT_EXPECT_FLOAT_EQ(1.0f, radiant_mat4x4_get(m, 15));
+  RADIANT_EXPECT_FLOAT_EQ(2.4f, radiant_mat4x4_get(m, 12));
+  RADIANT_EXPECT_FLOAT_EQ(-3.4f, radiant_mat4x4_get(m, 13));
+  RADIANT_EXPECT_FLOAT_EQ(10.9f, radiant_mat4x4_get(m, 14));
+  RADIANT_EXPECT_FLOAT_EQ(1.f, radiant_mat4x4_get(m, 15));
   return true;
 }
 
