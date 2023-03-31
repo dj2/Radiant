@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/array_element_count.h"
 #include "src/buffer.h"
 #include "src/engine.h"
 #include "src/resource_manager.h"
@@ -180,7 +181,8 @@ int main() {
       wgpuRenderPassEncoderSetPipeline(pass, pipeline);
       wgpuRenderPassEncoderSetVertexBuffer(pass, 0, vertex_buffer.buffer, 0,
                                            WGPU_WHOLE_SIZE);
-      wgpuRenderPassEncoderDraw(pass, 3, 1, 0, 0);
+      wgpuRenderPassEncoderDraw(pass, RADIANT_ARRAY_ELEMENT_COUNT(vertex_data),
+                                1, 0, 0);
       wgpuRenderPassEncoderEnd(pass);
 
       wgpuRenderPassEncoderRelease(pass);
