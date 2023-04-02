@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct Uniforms {
+  radiant_mat4x4_t model_view_project_matrix;
+} Uniforms;
+
 static struct vertices {
   radiant_point3_t pos;
   radiant_colour3_t colour;
@@ -204,7 +208,7 @@ int main() {
       .usage = (radiant_buffer_usage_t)(radiant_buffer_usage_uniform |
                                         radiant_buffer_usage_copy_dst),
       .label = "Uniform data",
-      .size_in_bytes = 16 * sizeof(float),
+      .size_in_bytes = sizeof(Uniforms),
   };
   radiant_buffer_t uniform_buffer = radiant_buffer_create(uniform_buffer_req);
 
@@ -229,7 +233,7 @@ int main() {
   WGPUBindGroupEntry bind_entries[] = {{
       .binding = 0,
       .buffer = uniform_buffer.buffer,
-      .size = 16 * sizeof(float),
+      .size = sizeof(Uniforms),
   }};
 
   WGPUBindGroupLayout bind_group_layout =
@@ -274,9 +278,11 @@ int main() {
         radiant_mat4x4_look_at(cam_pos, (radiant_vec3_t){0.f, 0.f, 0.f},
                                (radiant_vec3_t){0.f, 1.f, 0.f});
 
-    radiant_mat4x4_t proj_cam = radiant_mat4x4_mul(projection, cam);
+    Uniforms uniforms = {
+        .model_view_project_matrix = radiant_mat4x4_mul(projection, cam),
+    };
 
-    radiant_buffer_write(uniform_buffer, sizeof(proj_cam), &proj_cam);
+    radiant_buffer_write(uniform_buffer, sizeof(Uniforms), &uniforms);
 
     WGPUCommandEncoderDescriptor cmd_desc = {
         .label = "Main encoder",
