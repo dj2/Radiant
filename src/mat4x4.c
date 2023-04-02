@@ -38,13 +38,19 @@ radiant_mat4x4_t radiant_mat4x4_look_at(radiant_vec3_t eye,
   radiant_vec3_t x = radiant_vec3_normalize(radiant_vec3_cross(up, z));
   radiant_vec3_t y = radiant_vec3_normalize(radiant_vec3_cross(z, x));
 
+  radiant_vec3_t eye_pos = {
+      -(x.x * eye.x + x.y * eye.y + x.z * eye.z),
+      -(y.x * eye.x + y.y * eye.y + y.z * eye.z),
+      -(z.x * eye.x + z.y * eye.y + z.z * eye.z),
+  };
+
   return (radiant_mat4x4_t){
       // clang-format off
       .data = {
-             x.x,    y.x,   -z.x, 0.f,
-             x.y,    y.y,   -z.y, 0.f,
-             x.z,    y.z,   -z.z, 0.f,
-          -eye.x, -eye.y, -eye.z, 1.f,
+               x.x,       y.x,       z.x, 0.f,
+               x.y,       y.y,       z.y, 0.f,
+               x.z,       y.z,       z.z, 0.f,
+         eye_pos.x, eye_pos.y, eye_pos.z, 1.f,
       },
       // clang-format on
   };
@@ -141,12 +147,12 @@ radiant_mat4x4_t radiant_mat4x4_mul_mat4x4(radiant_mat4x4_t m,
                                            radiant_mat4x4_t b) {
   radiant_mat4x4_t r = radiant_mat4x4_identity();
   for (uint32_t i = 0; i < 4; ++i) {
-    uint32_t row = i * 4;
     for (uint32_t j = 0; j < 4; ++j) {
-      r.data[i + (j * 4)] = (m.data[j + 0] * b.data[row + 0]) +
-                            (m.data[j + 4] * b.data[row + 1]) +
-                            (m.data[j + 8] * b.data[row + 2]) +
-                            (m.data[j + 12] * b.data[row + 3]);
+      uint32_t row = j * 4;
+      r.data[i + (j * 4)] = (m.data[i + 0] * b.data[row + 0]) +
+                            (m.data[i + 4] * b.data[row + 1]) +
+                            (m.data[i + 8] * b.data[row + 2]) +
+                            (m.data[i + 12] * b.data[row + 3]);
     }
   }
   return r;

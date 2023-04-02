@@ -254,28 +254,29 @@ int main() {
     wgpuInstanceProcessEvents(engine.instance);
 
     frame += 1;
+    (void)frame;
 
     float aspect = 1024.f / 768.f;
     float fov_y_radians = (2.f * RADIANT_PI) / 5.f;
     radiant_mat4x4_t projection =
         radiant_mat4x4_perspective(fov_y_radians, aspect, 1.f, 100.f);
 
-    radiant_mat4x4_t cam = radiant_mat4x4_look_at(
-        (radiant_vec3_t){0.f, 0.f, 4.f}, (radiant_vec3_t){0.f, 0.f, 0.f},
-        (radiant_vec3_t){0.f, 1.f, 0.f});
+    radiant_vec3_t cam_initial_pos = {
+        0.f,
+        0.f,
+        4.f,
+    };
+    radiant_mat4x4_t rot =
+        radiant_mat4x4_rotate_y(radiant_deg_to_rad((float)(frame) / 2.f));
+    radiant_vec3_t cam_pos = radiant_mat4x4_mul(rot, cam_initial_pos);
+
+    radiant_mat4x4_t cam =
+        radiant_mat4x4_look_at(cam_pos, (radiant_vec3_t){0.f, 0.f, 0.f},
+                               (radiant_vec3_t){0.f, 1.f, 0.f});
 
     radiant_mat4x4_t proj_cam = radiant_mat4x4_mul(projection, cam);
-    radiant_mat4x4_t rot_y =
-        radiant_mat4x4_rotate_y(radiant_deg_to_rad((float)(frame) / 2.f));
-    radiant_mat4x4_t rot_x =
-        radiant_mat4x4_rotate_x(radiant_deg_to_rad((float)(frame) / 2.f));
-    radiant_mat4x4_t rot_z =
-        radiant_mat4x4_rotate_z(radiant_deg_to_rad((float)(frame) / 2.f));
-    radiant_mat4x4_t rot_xy = radiant_mat4x4_mul(rot_x, rot_y);
-    radiant_mat4x4_t rot = radiant_mat4x4_mul(rot_z, rot_xy);
-    radiant_mat4x4_t mvp = radiant_mat4x4_mul(rot, proj_cam);
 
-    radiant_buffer_write(uniform_buffer, sizeof(mvp), &mvp);
+    radiant_buffer_write(uniform_buffer, sizeof(proj_cam), &proj_cam);
 
     WGPUCommandEncoderDescriptor cmd_desc = {
         .label = "Main encoder",
