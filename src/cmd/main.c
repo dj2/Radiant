@@ -12,32 +12,76 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/angle.h"
 #include "src/array_element_count.h"
 #include "src/buffer.h"
+#include "src/colour3.h"
+#include "src/constants.h"
 #include "src/engine.h"
+#include "src/mat4x4.h"
+#include "src/point3.h"
 #include "src/resource_manager.h"
 #include "src/shader.h"
-#include "src/vec3.h"
 #include "src/window.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 static struct vertices {
-  radiant_vec3_t pos;
-  radiant_vec3_t colour;
+  radiant_point3_t pos;
+  radiant_colour3_t colour;
 } vertex_data[] = {
+    // Face 1 (Red)
     {
-        .pos = (radiant_vec3_t){0.0f, 0.5f, 0.0f},
-        .colour = (radiant_vec3_t){1.f, 0.f, 0.f},
+        .pos = (radiant_point3_t){.0f, .5f, .0f},
+        .colour = (radiant_colour3_t){1.f, 0.f, 0.f},
     },
     {
-        .pos = (radiant_vec3_t){-0.5f, -0.5f, 0.0f},
-        .colour = (radiant_vec3_t){0.f, 1.f, 0.f},
+        .pos = (radiant_point3_t){.5f, -.5f, -.5f},
+        .colour = (radiant_colour3_t){1.f, 0.f, 0.f},
     },
     {
-        .pos = (radiant_vec3_t){0.5f, -0.5f, 0.0f},
-        .colour = (radiant_vec3_t){0.f, 0.f, 1.f},
+        .pos = (radiant_point3_t){-.5f, -.5f, -.5f},
+        .colour = (radiant_colour3_t){1.f, 0.f, 0.f},
+    },
+    // Face 2 (Green)
+    {
+        .pos = (radiant_point3_t){.0f, .5f, .0f},
+        .colour = (radiant_colour3_t){0.f, 1.f, 0.f},
+    },
+    {
+        .pos = (radiant_point3_t){.0f, -.5f, .5f},
+        .colour = (radiant_colour3_t){0.f, 1.f, 0.f},
+    },
+    {
+        .pos = (radiant_point3_t){.5f, -.5f, -.5f},
+        .colour = (radiant_colour3_t){0.f, 1.f, 0.f},
+    },
+    // Face 3 (Blue)
+    {
+        .pos = (radiant_point3_t){.0f, .5f, .0f},
+        .colour = (radiant_colour3_t){0.f, 0.f, 1.f},
+    },
+    {
+        .pos = (radiant_point3_t){-.5f, -.5f, -.5f},
+        .colour = (radiant_colour3_t){0.f, 0.f, 1.f},
+    },
+    {
+        .pos = (radiant_point3_t){.0f, -.5f, .5f},
+        .colour = (radiant_colour3_t){0.f, 0.f, 1.f},
+    },
+    // Face 4
+    {
+        .pos = (radiant_point3_t){.0f, -.5f, .5f},
+        .colour = (radiant_colour3_t){0.f, 1.f, 1.f},
+    },
+    {
+        .pos = (radiant_point3_t){-.5f, -.5f, -.5f},
+        .colour = (radiant_colour3_t){0.f, 1.f, 1.f},
+    },
+    {
+        .pos = (radiant_point3_t){.5f, -.5f, -.5f},
+        .colour = (radiant_colour3_t){0.f, 1.f, 1.f},
     },
 };
 
@@ -68,15 +112,7 @@ int main() {
   }
   radiant_engine_t engine = engine_result.engine;
 
-  radiant_buffer_create_request_t vertex_buffer_req = {
-      .engine = engine,
-      .usage = radiant_buffer_usage_vertex,
-      .label = "Vertex data",
-      .size_in_bytes = sizeof(vertex_data),
-  };
-  radiant_buffer_t vertex_buffer =
-      radiant_buffer_create_with_data(vertex_buffer_req, vertex_data);
-
+  // Create shader
   radiant_shader_create_result_t shader_result =
       radiant_shader_create_from_file(engine, manager, "Passthrough shader",
                                       "shaders/pass_through.wgsl");
@@ -113,13 +149,35 @@ int main() {
       .targets = &target,
   };
 
+  WGPUDepthStencilState depth_stencil = {
+      .format = WGPUTextureFormat_Depth24Plus,
+      .depthWriteEnabled = true,
+      .depthCompare = WGPUCompareFunction_Less,
+      .stencilFront =
+          {
+              .compare = WGPUCompareFunction_Always,
+              .failOp = WGPUStencilOperation_Keep,
+              .depthFailOp = WGPUStencilOperation_Keep,
+              .passOp = WGPUStencilOperation_Keep,
+          },
+      .stencilBack =
+          {
+              .compare = WGPUCompareFunction_Always,
+              .failOp = WGPUStencilOperation_Keep,
+              .depthFailOp = WGPUStencilOperation_Keep,
+              .passOp = WGPUStencilOperation_Keep,
+          },
+      .stencilReadMask = 0xffffffff,
+      .stencilWriteMask = 0xffffffff,
+  };
+
   WGPURenderPipelineDescriptor pipeline_desc = {
       .label = "Main Render Pipeline",
       .primitive =
           {
               .topology = WGPUPrimitiveTopology_TriangleList,
-              .frontFace = WGPUFrontFace_CCW,
-              .cullMode = WGPUCullMode_None,
+              .frontFace = WGPUFrontFace_CW,
+              .cullMode = WGPUCullMode_Back,
           },
       .vertex =
           {
@@ -129,6 +187,7 @@ int main() {
               .buffers = &vert_buf_layout,
           },
       .fragment = &frag_state,
+      .depthStencil = &depth_stencil,
       .multisample =
           {
               .count = 1,
@@ -139,12 +198,94 @@ int main() {
   WGPURenderPipeline pipeline =
       wgpuDeviceCreateRenderPipeline(engine.device, &pipeline_desc);
 
+  // Create Vertex Buffer
+  radiant_buffer_create_request_t vertex_buffer_req = {
+      .engine = engine,
+      .usage = radiant_buffer_usage_vertex,
+      .label = "Vertex data",
+      .size_in_bytes = sizeof(vertex_data),
+  };
+  radiant_buffer_t vertex_buffer =
+      radiant_buffer_create_with_data(vertex_buffer_req, vertex_data);
+
+  // Create Uniform Buffer
+  radiant_buffer_create_request_t uniform_buffer_req = {
+      .engine = engine,
+      .usage = (radiant_buffer_usage_t)(radiant_buffer_usage_uniform |
+                                        radiant_buffer_usage_copy_dst),
+      .label = "Uniform data",
+      .size_in_bytes = 16 * sizeof(float),
+  };
+  radiant_buffer_t uniform_buffer = radiant_buffer_create(uniform_buffer_req);
+
+  // Create depth texture
+  WGPUTextureDescriptor texture_desc = {
+      .label = "Depth texture",
+      .usage = WGPUTextureUsage_RenderAttachment,
+      .dimension = WGPUTextureDimension_2D,
+      .format = WGPUTextureFormat_Depth24Plus,
+      .size =
+          {
+              .width = 1024,
+              .height = 768,
+              .depthOrArrayLayers = 1,
+          },
+      .mipLevelCount = 1,
+      .sampleCount = 1,
+  };
+  WGPUTexture depth_texture =
+      wgpuDeviceCreateTexture(engine.device, &texture_desc);
+
+  WGPUBindGroupEntry bind_entries[] = {{
+      .binding = 0,
+      .buffer = uniform_buffer.buffer,
+      .size = 16 * sizeof(float),
+  }};
+
+  WGPUBindGroupLayout bind_group_layout =
+      wgpuRenderPipelineGetBindGroupLayout(pipeline, 0);
+  WGPUBindGroupDescriptor bind_group_desc = {
+      .label = "Uniform bind group",
+      .layout = bind_group_layout,
+      .entryCount = 1,
+      .entries = bind_entries,
+  };
+  WGPUBindGroup uniform_bind_group =
+      wgpuDeviceCreateBindGroup(engine.device, &bind_group_desc);
+
+  wgpuBindGroupLayoutRelease(bind_group_layout);
+
   radiant_shader_destroy(shader);
+
+  uint64_t frame = 0;
 
   while (!radiant_window_should_close(window)) {
     radiant_windows_poll_events();
-
     wgpuInstanceProcessEvents(engine.instance);
+
+    frame += 1;
+
+    float aspect = 1024.f / 768.f;
+    float fov_y_radians = (2.f * RADIANT_PI) / 5.f;
+    radiant_mat4x4_t projection =
+        radiant_mat4x4_perspective(fov_y_radians, aspect, 1.f, 100.f);
+
+    radiant_mat4x4_t cam = radiant_mat4x4_look_at(
+        (radiant_vec3_t){0.f, 0.f, 4.f}, (radiant_vec3_t){0.f, 0.f, 0.f},
+        (radiant_vec3_t){0.f, 1.f, 0.f});
+
+    radiant_mat4x4_t proj_cam = radiant_mat4x4_mul(projection, cam);
+    radiant_mat4x4_t rot_y =
+        radiant_mat4x4_rotate_y(radiant_deg_to_rad((float)(frame) / 2.f));
+    radiant_mat4x4_t rot_x =
+        radiant_mat4x4_rotate_x(radiant_deg_to_rad((float)(frame) / 2.f));
+    radiant_mat4x4_t rot_z =
+        radiant_mat4x4_rotate_z(radiant_deg_to_rad((float)(frame) / 2.f));
+    radiant_mat4x4_t rot_xy = radiant_mat4x4_mul(rot_x, rot_y);
+    radiant_mat4x4_t rot = radiant_mat4x4_mul(rot_z, rot_xy);
+    radiant_mat4x4_t mvp = radiant_mat4x4_mul(rot, proj_cam);
+
+    radiant_buffer_write(uniform_buffer, sizeof(mvp), &mvp);
 
     WGPUCommandEncoderDescriptor cmd_desc = {
         .label = "Main encoder",
@@ -169,16 +310,25 @@ int main() {
               },
       };
 
+      WGPUTextureView depth_view = wgpuTextureCreateView(depth_texture, NULL);
+      WGPURenderPassDepthStencilAttachment depth_attach = {
+          .view = depth_view,
+          .depthClearValue = 1.f,
+          .depthLoadOp = WGPULoadOp_Clear,
+          .depthStoreOp = WGPUStoreOp_Store,
+      };
       WGPURenderPassDescriptor pass_desc = {
           .label = "Render pass",
           .colorAttachmentCount = 1,
           .colorAttachments = &colour_attach,
+          .depthStencilAttachment = &depth_attach,
       };
 
       WGPURenderPassEncoder pass =
           wgpuCommandEncoderBeginRenderPass(encoder, &pass_desc);
 
       wgpuRenderPassEncoderSetPipeline(pass, pipeline);
+      wgpuRenderPassEncoderSetBindGroup(pass, 0, uniform_bind_group, 0, NULL);
       wgpuRenderPassEncoderSetVertexBuffer(pass, 0, vertex_buffer.buffer, 0,
                                            WGPU_WHOLE_SIZE);
       wgpuRenderPassEncoderDraw(pass, RADIANT_ARRAY_ELEMENT_COUNT(vertex_data),
@@ -186,6 +336,7 @@ int main() {
       wgpuRenderPassEncoderEnd(pass);
 
       wgpuRenderPassEncoderRelease(pass);
+      wgpuTextureViewRelease(depth_view);
     }
 
     WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, NULL);
@@ -200,6 +351,7 @@ int main() {
 
   wgpuRenderPipelineRelease(pipeline);
 
+  radiant_buffer_destroy(uniform_buffer);
   radiant_buffer_destroy(vertex_buffer);
   radiant_engine_destroy(engine);
   radiant_window_destroy(window);

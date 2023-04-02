@@ -14,6 +14,8 @@
 
 add_library(libradiant "")
 target_sources(libradiant PRIVATE
+  angle.c
+  angle.h
   array_element_count.h
   assert.c
   assert.h

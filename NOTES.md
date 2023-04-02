@@ -55,6 +55,10 @@ Zero initializing structs, have to be very careful about default values, things 
 or the `ColorTargetState` `WriteMask` cause problems. At least with `multisample` a validation error
 is generated. With `WriteMask` set to `0` nothing renders.
 
+## Confusing error message from DepthStencilState
+Leaving `stencilFront` or `stencilBack` as zero initializes gives error about `WGPUCompareFunction`
+but says while validating `depthStencil` which also has a compare function which was initialized.
+
 # Resolved
 
 ## Unhandled error timing

@@ -1,3 +1,8 @@
+struct Uniforms {
+  modelViewProjectionMatrix : mat4x4<f32>,
+}
+
+@binding(0) @group(0) var<uniform> uniforms : Uniforms;
 struct VertexInput {
   @location(0) pos: vec3f,
   @location(1) color: vec3f,
@@ -10,7 +15,8 @@ struct VertexOutput {
 
 @vertex
 fn vs_main(in : VertexInput) -> VertexOutput {
-  return VertexOutput(vec4(in.pos, 1), in.color);
+  let pos = uniforms.modelViewProjectionMatrix * vec4(in.pos, 1);
+  return VertexOutput(pos, in.color);
 }
 
 @fragment
