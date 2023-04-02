@@ -31,58 +31,39 @@ static struct vertices {
   radiant_point3_t pos;
   radiant_colour3_t colour;
 } vertex_data[] = {
-    // Face 1 (Red)
     {
+        // 0
         .pos = (radiant_point3_t){.0f, .5f, .0f},
         .colour = (radiant_colour3_t){1.f, 0.f, 0.f},
     },
     {
-        .pos = (radiant_point3_t){.5f, -.5f, -.5f},
-        .colour = (radiant_colour3_t){1.f, 0.f, 0.f},
-    },
-    {
-        .pos = (radiant_point3_t){-.5f, -.5f, -.5f},
-        .colour = (radiant_colour3_t){1.f, 0.f, 0.f},
-    },
-    // Face 2 (Green)
-    {
-        .pos = (radiant_point3_t){.0f, .5f, .0f},
-        .colour = (radiant_colour3_t){0.f, 1.f, 0.f},
-    },
-    {
-        .pos = (radiant_point3_t){.0f, -.5f, .5f},
-        .colour = (radiant_colour3_t){0.f, 1.f, 0.f},
-    },
-    {
+        // 1
         .pos = (radiant_point3_t){.5f, -.5f, -.5f},
         .colour = (radiant_colour3_t){0.f, 1.f, 0.f},
     },
-    // Face 3 (Blue)
     {
-        .pos = (radiant_point3_t){.0f, .5f, .0f},
-        .colour = (radiant_colour3_t){0.f, 0.f, 1.f},
-    },
-    {
+        // 2
         .pos = (radiant_point3_t){-.5f, -.5f, -.5f},
         .colour = (radiant_colour3_t){0.f, 0.f, 1.f},
     },
     {
+        // 3
         .pos = (radiant_point3_t){.0f, -.5f, .5f},
-        .colour = (radiant_colour3_t){0.f, 0.f, 1.f},
+        .colour = (radiant_colour3_t){1.f, 1.f, 0.f},
     },
+};
+
+static uint16_t index_data[] = {
+    // clang-format off
+    // Face 1
+    0, 1, 2,
+    // Face 2
+    0, 3, 1,
+    // Face 3
+    0, 2, 3,
     // Face 4
-    {
-        .pos = (radiant_point3_t){.0f, -.5f, .5f},
-        .colour = (radiant_colour3_t){0.f, 1.f, 1.f},
-    },
-    {
-        .pos = (radiant_point3_t){-.5f, -.5f, -.5f},
-        .colour = (radiant_colour3_t){0.f, 1.f, 1.f},
-    },
-    {
-        .pos = (radiant_point3_t){.5f, -.5f, -.5f},
-        .colour = (radiant_colour3_t){0.f, 1.f, 1.f},
-    },
+    3, 2, 1,
+    // clang-format on
 };
 
 int main() {
@@ -208,6 +189,15 @@ int main() {
   radiant_buffer_t vertex_buffer =
       radiant_buffer_create_with_data(vertex_buffer_req, vertex_data);
 
+  radiant_buffer_create_request_t index_buffer_req = {
+      .engine = engine,
+      .usage = radiant_buffer_usage_index,
+      .label = "Index buffer",
+      .size_in_bytes = sizeof(index_data),
+  };
+  radiant_buffer_t index_buffer =
+      radiant_buffer_create_with_data(index_buffer_req, index_data);
+
   // Create Uniform Buffer
   radiant_buffer_create_request_t uniform_buffer_req = {
       .engine = engine,
@@ -331,8 +321,11 @@ int main() {
       wgpuRenderPassEncoderSetBindGroup(pass, 0, uniform_bind_group, 0, NULL);
       wgpuRenderPassEncoderSetVertexBuffer(pass, 0, vertex_buffer.buffer, 0,
                                            WGPU_WHOLE_SIZE);
-      wgpuRenderPassEncoderDraw(pass, RADIANT_ARRAY_ELEMENT_COUNT(vertex_data),
-                                1, 0, 0);
+      wgpuRenderPassEncoderSetIndexBuffer(pass, index_buffer.buffer,
+                                          WGPUIndexFormat_Uint16, 0,
+                                          WGPU_WHOLE_SIZE);
+      wgpuRenderPassEncoderDrawIndexed(
+          pass, RADIANT_ARRAY_ELEMENT_COUNT(index_data), 1, 0, 0, 0);
       wgpuRenderPassEncoderEnd(pass);
 
       wgpuRenderPassEncoderRelease(pass);
@@ -352,6 +345,7 @@ int main() {
   wgpuRenderPipelineRelease(pipeline);
 
   radiant_buffer_destroy(uniform_buffer);
+  radiant_buffer_destroy(index_buffer);
   radiant_buffer_destroy(vertex_buffer);
   radiant_engine_destroy(engine);
   radiant_window_destroy(window);
