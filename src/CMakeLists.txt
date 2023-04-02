@@ -50,6 +50,7 @@ target_sources(libradiant PRIVATE
   vec3.h
   vec4.c
   vec4.h
+  view.h
   unreachable.h
   unreachable.h
   wgpu.h

@@ -135,7 +135,8 @@ static radiant_surface_descriptor_t create_surface_descriptor(
 #endif
 }
 
-radiant_engine_create_result_t radiant_engine_create(radiant_window_t window) {
+radiant_engine_create_result_t radiant_engine_create(radiant_window_t window,
+                                                     radiant_view_t view) {
   radiant_engine_create_result_t result = {
       .engine = {0},
       .succeeded = true,
@@ -176,8 +177,8 @@ radiant_engine_create_result_t radiant_engine_create(radiant_window_t window) {
       .label = "Primary swapchain",
       .usage = WGPUTextureUsage_RenderAttachment,
       .format = WGPUTextureFormat_BGRA8Unorm,
-      .width = 1024,
-      .height = 768,
+      .width = (uint32_t)view.size.width,
+      .height = (uint32_t)view.size.height,
       .presentMode = WGPUPresentMode_Mailbox,
   };
   engine->swapchain = wgpuDeviceCreateSwapChain(engine->device, engine->surface,

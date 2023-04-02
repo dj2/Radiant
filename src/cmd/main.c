@@ -23,6 +23,7 @@
 #include "src/point3.h"
 #include "src/resource_manager.h"
 #include "src/shader.h"
+#include "src/view.h"
 #include "src/window.h"
 
 #include <math.h>
@@ -87,13 +88,28 @@ int main() {
     return 1;
   }
 
-  radiant_window_create_result_t window_result = radiant_window_create();
+  radiant_view_t view = {
+      .size =
+          {
+              .width = 1024.f,
+              .height = 768.f,
+          },
+      .fov_y_radians = (2.f * RADIANT_PI) / 5.f,
+      .planes =
+          {
+              .near = 1.f,
+              .far = 100.f,
+          },
+  };
+
+  radiant_window_create_result_t window_result = radiant_window_create(view);
   if (!window_result.succeeded) {
     return 1;
   }
   radiant_window_t window = window_result.window;
 
-  radiant_engine_create_result_t engine_result = radiant_engine_create(window);
+  radiant_engine_create_result_t engine_result =
+      radiant_engine_create(window, view);
   if (!engine_result.succeeded) {
     return 1;
   }
@@ -226,8 +242,8 @@ int main() {
       .format = WGPUTextureFormat_Depth24Plus,
       .size =
           {
-              .width = 1024,
-              .height = 768,
+              .width = (uint32_t)view.size.width,
+              .height = (uint32_t)view.size.height,
               .depthOrArrayLayers = 1,
           },
       .mipLevelCount = 1,
@@ -257,19 +273,6 @@ int main() {
 
   radiant_shader_destroy(shader);
 
-  radiant_view_t view = {
-      .size =
-          {
-              .width = 1024.f,
-              .height = 768.f,
-          },
-      .fov_y_radians = (2.f * RADIANT_PI) / 5.f,
-      .planes =
-          {
-              .near = 1.f,
-              .far = 100.f,
-          },
-  };
   radiant_camera_t cam = radiant_camera_create(
       (radiant_point3_t){0.f, 0.f, 4.f}, (radiant_point3_t){0.f, 0.f, 0.f},
       (radiant_vec3_t){0.f, 1.f, 0.f}, view);

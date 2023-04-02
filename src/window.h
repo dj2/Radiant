@@ -16,6 +16,7 @@
 
 #include "src/glfw.h"
 #include "src/pad.h"
+#include "src/view.h"
 
 #include <stdbool.h>
 
@@ -43,7 +44,7 @@ void radiant_windows_shutdown(void);
 void radiant_windows_poll_events(void);
 
 /// Creates a new window
-radiant_window_create_result_t radiant_window_create(void);
+radiant_window_create_result_t radiant_window_create(radiant_view_t view);
 /// Destroys a window
 void radiant_window_destroy(radiant_window_t window);
 

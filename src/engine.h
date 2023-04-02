@@ -15,6 +15,7 @@
 #pragma once
 
 #include "src/pad.h"
+#include "src/view.h"
 #include "src/wgpu.h"
 #include "src/window.h"
 
@@ -38,7 +39,8 @@ typedef struct radiant_engine_create_result_t {
 } radiant_engine_create_result_t;
 
 /// Creates and initializes a new engine based on the given |window|.
-radiant_engine_create_result_t radiant_engine_create(radiant_window_t window);
+radiant_engine_create_result_t radiant_engine_create(radiant_window_t window,
+                                                     radiant_view_t view);
 
 /// Destroys the |engine|.
 void radiant_engine_destroy(radiant_engine_t engine);

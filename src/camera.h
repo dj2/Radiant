@@ -3,18 +3,7 @@
 #include "src/mat4x4.h"
 #include "src/point3.h"
 #include "src/vec3.h"
-
-typedef struct radiant_view_t {
-  struct {
-    float width;
-    float height;
-  } size;
-  float fov_y_radians;
-  struct {
-    float near;
-    float far;
-  } planes;
-} radiant_view_t;
+#include "src/view.h"
 
 typedef struct radiant_camera_t {
   struct {

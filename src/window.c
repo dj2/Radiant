@@ -38,7 +38,7 @@ void radiant_windows_poll_events() {
   glfwPollEvents();
 }
 
-radiant_window_create_result_t radiant_window_create() {
+radiant_window_create_result_t radiant_window_create(radiant_view_t view) {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 
@@ -47,7 +47,9 @@ radiant_window_create_result_t radiant_window_create() {
       .succeeded = true,
   };
   radiant_window_t* window = &result.window;
-  window->glfw_window = glfwCreateWindow(1024, 768, "radiant", NULL, NULL);
+  window->glfw_window =
+      glfwCreateWindow((int32_t)view.size.width, (int32_t)view.size.height,
+                       "radiant", NULL, NULL);
   if (!window->glfw_window) {
     fprintf(stderr, "Failed to create window\n");
     result.succeeded = false;
