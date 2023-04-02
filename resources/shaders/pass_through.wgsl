@@ -6,6 +6,7 @@ struct Uniforms {
 struct VertexInput {
   @location(0) pos: vec3f,
   @location(1) color: vec3f,
+  @builtin(instance_index) instance: u32,
 }
 
 struct VertexOutput {
@@ -15,8 +16,9 @@ struct VertexOutput {
 
 @vertex
 fn vs_main(in : VertexInput) -> VertexOutput {
-  let pos = uniforms.modelViewProjectionMatrix * vec4(in.pos, 1);
-  return VertexOutput(pos, in.color);
+  let pos = in.pos + select(vec3f(1, 0, 0), vec3f(-1, 0, 0), in.instance == 0);
+  let projected = uniforms.modelViewProjectionMatrix * vec4(pos, 1);
+  return VertexOutput(projected, in.color);
 }
 
 @fragment

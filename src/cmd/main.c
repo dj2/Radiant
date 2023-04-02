@@ -348,7 +348,7 @@ int main() {
                                           WGPUIndexFormat_Uint16, 0,
                                           WGPU_WHOLE_SIZE);
       wgpuRenderPassEncoderDrawIndexed(
-          pass, RADIANT_ARRAY_ELEMENT_COUNT(index_data), 1, 0, 0, 0);
+          pass, RADIANT_ARRAY_ELEMENT_COUNT(index_data), 2, 0, 0, 0);
       wgpuRenderPassEncoderEnd(pass);
 
       wgpuRenderPassEncoderRelease(pass);
