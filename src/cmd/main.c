@@ -136,20 +136,24 @@ int main() {
           .shaderLocation = 1,
       },
   };
-  WGPUVertexBufferLayout vert_buf_layout = {
-      .arrayStride = sizeof(struct vertices),
-      .attributeCount = 2,
-      .attributes = vert_attrs,
+  WGPUVertexBufferLayout vert_buf_layout[] = {
+      {
+          .arrayStride = sizeof(struct vertices),
+          .attributeCount = RADIANT_ARRAY_ELEMENT_COUNT(vert_attrs),
+          .attributes = vert_attrs,
+      },
   };
-  WGPUColorTargetState target = {
-      .format = WGPUTextureFormat_BGRA8Unorm,
-      .writeMask = WGPUColorWriteMask_All,
+  WGPUColorTargetState target[] = {
+      {
+          .format = WGPUTextureFormat_BGRA8Unorm,
+          .writeMask = WGPUColorWriteMask_All,
+      },
   };
   WGPUFragmentState frag_state = {
       .module = shader.mod,
       .entryPoint = "fs_main",
-      .targetCount = 1,
-      .targets = &target,
+      .targetCount = RADIANT_ARRAY_ELEMENT_COUNT(target),
+      .targets = target,
   };
 
   WGPUDepthStencilState depth_stencil = {
@@ -186,8 +190,8 @@ int main() {
           {
               .module = shader.mod,
               .entryPoint = "vs_main",
-              .bufferCount = 1,
-              .buffers = &vert_buf_layout,
+              .bufferCount = RADIANT_ARRAY_ELEMENT_COUNT(vert_buf_layout),
+              .buffers = vert_buf_layout,
           },
       .fragment = &frag_state,
       .depthStencil = &depth_stencil,
@@ -252,18 +256,20 @@ int main() {
   WGPUTexture depth_texture =
       wgpuDeviceCreateTexture(engine.device, &texture_desc);
 
-  WGPUBindGroupEntry bind_entries[] = {{
-      .binding = 0,
-      .buffer = uniform_buffer.buffer,
-      .size = sizeof(Uniforms),
-  }};
+  WGPUBindGroupEntry bind_entries[] = {
+      {
+          .binding = 0,
+          .buffer = uniform_buffer.buffer,
+          .size = sizeof(Uniforms),
+      },
+  };
 
   WGPUBindGroupLayout bind_group_layout =
       wgpuRenderPipelineGetBindGroupLayout(pipeline, 0);
   WGPUBindGroupDescriptor bind_group_desc = {
       .label = "Uniform bind group",
       .layout = bind_group_layout,
-      .entryCount = 1,
+      .entryCount = RADIANT_ARRAY_ELEMENT_COUNT(bind_entries),
       .entries = bind_entries,
   };
   WGPUBindGroup uniform_bind_group =
@@ -302,17 +308,19 @@ int main() {
       WGPUTextureView backbuffer =
           wgpuSwapChainGetCurrentTextureView(engine.swapchain);
 
-      WGPURenderPassColorAttachment colour_attach = {
-          .view = backbuffer,
-          .loadOp = WGPULoadOp_Clear,
-          .storeOp = WGPUStoreOp_Store,
-          .clearValue =
-              {
-                  .r = .2,
-                  .g = .2,
-                  .b = .2,
-                  .a = 1.,
-              },
+      WGPURenderPassColorAttachment colour_attach[] = {
+          {
+              .view = backbuffer,
+              .loadOp = WGPULoadOp_Clear,
+              .storeOp = WGPUStoreOp_Store,
+              .clearValue =
+                  {
+                      .r = .2,
+                      .g = .2,
+                      .b = .2,
+                      .a = 1.,
+                  },
+          },
       };
 
       WGPUTextureView depth_view = wgpuTextureCreateView(depth_texture, NULL);
@@ -324,8 +332,8 @@ int main() {
       };
       WGPURenderPassDescriptor pass_desc = {
           .label = "Render pass",
-          .colorAttachmentCount = 1,
-          .colorAttachments = &colour_attach,
+          .colorAttachmentCount = RADIANT_ARRAY_ELEMENT_COUNT(colour_attach),
+          .colorAttachments = colour_attach,
           .depthStencilAttachment = &depth_attach,
       };
 
