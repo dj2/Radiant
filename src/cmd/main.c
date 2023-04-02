@@ -15,6 +15,7 @@
 #include "src/angle.h"
 #include "src/array_element_count.h"
 #include "src/buffer.h"
+#include "src/camera.h"
 #include "src/colour3.h"
 #include "src/constants.h"
 #include "src/engine.h"
@@ -24,11 +25,12 @@
 #include "src/shader.h"
 #include "src/window.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 typedef struct Uniforms {
-  radiant_mat4x4_t model_view_project_matrix;
+  radiant_mat4x4_t model_view_projection_matrix;
 } Uniforms;
 
 static struct vertices {
@@ -193,6 +195,7 @@ int main() {
   radiant_buffer_t vertex_buffer =
       radiant_buffer_create_with_data(vertex_buffer_req, vertex_data);
 
+  // Create index buffer
   radiant_buffer_create_request_t index_buffer_req = {
       .engine = engine,
       .usage = radiant_buffer_usage_index,
@@ -203,14 +206,17 @@ int main() {
       radiant_buffer_create_with_data(index_buffer_req, index_data);
 
   // Create Uniform Buffer
+  Uniforms uniforms = {
+      .model_view_projection_matrix = radiant_mat4x4_identity(),
+  };
   radiant_buffer_create_request_t uniform_buffer_req = {
       .engine = engine,
-      .usage = (radiant_buffer_usage_t)(radiant_buffer_usage_uniform |
-                                        radiant_buffer_usage_copy_dst),
+      .usage = radiant_buffer_usage_uniform,
       .label = "Uniform data",
-      .size_in_bytes = sizeof(Uniforms),
+      .size_in_bytes = sizeof(uniforms),
   };
-  radiant_buffer_t uniform_buffer = radiant_buffer_create(uniform_buffer_req);
+  radiant_buffer_t uniform_buffer =
+      radiant_buffer_create_with_data(uniform_buffer_req, &uniforms);
 
   // Create depth texture
   WGPUTextureDescriptor texture_desc = {
@@ -251,6 +257,23 @@ int main() {
 
   radiant_shader_destroy(shader);
 
+  radiant_view_t view = {
+      .size =
+          {
+              .width = 1024.f,
+              .height = 768.f,
+          },
+      .fov_y_radians = (2.f * RADIANT_PI) / 5.f,
+      .planes =
+          {
+              .near = 1.f,
+              .far = 100.f,
+          },
+  };
+  radiant_camera_t cam = radiant_camera_create(
+      (radiant_point3_t){0.f, 0.f, 4.f}, (radiant_point3_t){0.f, 0.f, 0.f},
+      (radiant_vec3_t){0.f, 1.f, 0.f}, view);
+
   uint64_t frame = 0;
 
   while (!radiant_window_should_close(window)) {
@@ -258,31 +281,13 @@ int main() {
     wgpuInstanceProcessEvents(engine.instance);
 
     frame += 1;
-    (void)frame;
 
-    float aspect = 1024.f / 768.f;
-    float fov_y_radians = (2.f * RADIANT_PI) / 5.f;
-    radiant_mat4x4_t projection =
-        radiant_mat4x4_perspective(fov_y_radians, aspect, 1.f, 100.f);
+    float frame_deg = radiant_deg_to_rad((float)frame);
+    radiant_camera_rotate(
+        &cam, (radiant_point3_t){cosf(frame_deg), sinf(frame_deg), 0.f});
 
-    radiant_vec3_t cam_initial_pos = {
-        0.f,
-        0.f,
-        4.f,
-    };
-    radiant_mat4x4_t rot =
-        radiant_mat4x4_rotate_y(radiant_deg_to_rad((float)(frame) / 2.f));
-    radiant_vec3_t cam_pos = radiant_mat4x4_mul(rot, cam_initial_pos);
-
-    radiant_mat4x4_t cam =
-        radiant_mat4x4_look_at(cam_pos, (radiant_vec3_t){0.f, 0.f, 0.f},
-                               (radiant_vec3_t){0.f, 1.f, 0.f});
-
-    Uniforms uniforms = {
-        .model_view_project_matrix = radiant_mat4x4_mul(projection, cam),
-    };
-
-    radiant_buffer_write(uniform_buffer, sizeof(Uniforms), &uniforms);
+    uniforms.model_view_projection_matrix = cam.view_projection_matrix;
+    radiant_buffer_write(uniform_buffer, sizeof(uniforms), &uniforms);
 
     WGPUCommandEncoderDescriptor cmd_desc = {
         .label = "Main encoder",
@@ -351,6 +356,7 @@ int main() {
 
   wgpuRenderPipelineRelease(pipeline);
 
+  radiant_camera_destroy(cam);
   radiant_buffer_destroy(uniform_buffer);
   radiant_buffer_destroy(index_buffer);
   radiant_buffer_destroy(vertex_buffer);

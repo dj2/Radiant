@@ -42,9 +42,10 @@ static bool identity() {
 }
 
 static bool look_at() {
-  radiant_mat4x4_t m = radiant_mat4x4_look_at(
-      (radiant_vec3_t){2.0f, 2.0f, -2.0f}, (radiant_vec3_t){-1.0f, -1.0f, 1.0f},
-      (radiant_vec3_t){0.0f, 1.0f, 0.0f});
+  radiant_mat4x4_t m =
+      radiant_mat4x4_look_at((radiant_point3_t){2.0f, 2.0f, -2.0f},
+                             (radiant_point3_t){-1.0f, -1.0f, 1.0f},
+                             (radiant_vec3_t){0.0f, 1.0f, 0.0f});
 
   RADIANT_EXPECT_FLOAT_EQ(-0.707107f, radiant_mat4x4_get(m, 0));
   RADIANT_EXPECT_FLOAT_EQ(-0.40824831f, radiant_mat4x4_get(m, 1));

@@ -31,10 +31,10 @@ radiant_mat4x4_t radiant_mat4x4_identity(void) {
   };
 }
 
-radiant_mat4x4_t radiant_mat4x4_look_at(radiant_vec3_t eye,
-                                        radiant_vec3_t centre,
+radiant_mat4x4_t radiant_mat4x4_look_at(radiant_point3_t eye,
+                                        radiant_point3_t centre,
                                         radiant_vec3_t up) {
-  radiant_vec3_t z = radiant_vec3_normalize(radiant_vec3_sub(eye, centre));
+  radiant_vec3_t z = radiant_vec3_normalize(radiant_point3_sub(eye, centre));
   radiant_vec3_t x = radiant_vec3_normalize(radiant_vec3_cross(up, z));
   radiant_vec3_t y = radiant_vec3_normalize(radiant_vec3_cross(z, x));
 

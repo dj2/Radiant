@@ -38,8 +38,8 @@ typedef struct radiant_mat4x4_t {
 radiant_mat4x4_t radiant_mat4x4_identity(void);
 
 /// Returns the view matrix for given |eye| looking at |centre| with |up|.
-radiant_mat4x4_t radiant_mat4x4_look_at(radiant_vec3_t eye,
-                                        radiant_vec3_t centre,
+radiant_mat4x4_t radiant_mat4x4_look_at(radiant_point3_t eye,
+                                        radiant_point3_t centre,
                                         radiant_vec3_t up);
 
 /// Returns the perspective matrix with a field of view |fov_y_radians|,
