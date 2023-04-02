@@ -49,6 +49,9 @@ radiant_mat4x4_t radiant_mat4x4_perspective(float fov_y_radians,
                                             float near,
                                             float far);
 
+/// Returns the matrix to rotate around the given axis
+radiant_mat4x4_t radiant_mat4x4_rotate(radiant_point3_t angles_in_radians);
+
 /// Returns the matrix to rotate around the X axis by |angle_radians|.
 radiant_mat4x4_t radiant_mat4x4_rotate_x(float angle_radians);
 

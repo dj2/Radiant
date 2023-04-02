@@ -75,6 +75,26 @@ radiant_mat4x4_t radiant_mat4x4_perspective(float fov_y_radians,
   };
 }
 
+radiant_mat4x4_t radiant_mat4x4_rotate(radiant_point3_t angles_in_radians) {
+  // TODO(dsinclair): Do this is a single matrix instead of multiplying
+  radiant_mat4x4_t rot_x = radiant_mat4x4_identity();
+  radiant_mat4x4_t rot_y = radiant_mat4x4_identity();
+  radiant_mat4x4_t rot_z = radiant_mat4x4_identity();
+
+  if (angles_in_radians.x != 0.f) {
+    rot_x = radiant_mat4x4_rotate_x(angles_in_radians.x);
+  }
+  if (angles_in_radians.y != 0.f) {
+    rot_y = radiant_mat4x4_rotate_y(angles_in_radians.y);
+  }
+  if (angles_in_radians.z != 0.f) {
+    rot_z = radiant_mat4x4_rotate_z(angles_in_radians.x);
+  }
+
+  radiant_mat4x4_t rot_yz = radiant_mat4x4_mul(rot_y, rot_z);
+  return radiant_mat4x4_mul(rot_x, rot_yz);
+}
+
 radiant_mat4x4_t radiant_mat4x4_rotate_x(float angle_radians) {
   return (radiant_mat4x4_t){
       // clang-format off

@@ -32,6 +32,10 @@
 
 typedef struct Uniforms {
   radiant_mat4x4_t model_view_projection_matrix;
+  uint32_t frame;
+  float frame_radians;
+  // Pad size in order to get correct size for WGSL buffer
+  RADIANT_PAD(sizeof(radiant_mat4x4_t) - sizeof(uint32_t) - sizeof(float));
 } Uniforms;
 
 static struct vertices {
@@ -228,6 +232,8 @@ int main() {
   // Create Uniform Buffer
   Uniforms uniforms = {
       .model_view_projection_matrix = radiant_mat4x4_identity(),
+      .frame = 0,
+      .frame_radians = radiant_deg_to_rad(0),
   };
   radiant_buffer_create_request_t uniform_buffer_req = {
       .engine = engine,
@@ -302,7 +308,7 @@ int main() {
       (radiant_point3_t){0.f, 0.f, 4.f}, (radiant_point3_t){0.f, 0.f, 0.f},
       (radiant_vec3_t){0.f, 1.f, 0.f}, view);
 
-  uint64_t frame = 0;
+  uint32_t frame = 0;
 
   while (!radiant_window_should_close(window)) {
     radiant_windows_poll_events();
@@ -310,11 +316,19 @@ int main() {
 
     frame += 1;
 
-    float frame_deg = radiant_deg_to_rad((float)frame);
-    radiant_camera_rotate(
-        &cam, (radiant_point3_t){cosf(frame_deg), sinf(frame_deg), 0.f});
+    float frame_deg = radiant_deg_to_rad((float)(frame % 360));
+    // Rotate camera
+    radiant_camera_rotate(&cam, (radiant_point3_t){0.f, frame_deg, 0.f});
 
-    uniforms.model_view_projection_matrix = cam.view_projection_matrix;
+    // Object rotation
+    radiant_mat4x4_t model_matrix = radiant_mat4x4_identity();
+    //    radiant_mat4x4_translate((radiant_vec3_t){0.f, sinf(frame_deg), 0.f});
+
+    uniforms.frame = frame;
+    uniforms.frame_radians = radiant_deg_to_rad((float)frame);
+    uniforms.model_view_projection_matrix =
+        radiant_mat4x4_mul(cam.projection_view_matrix, model_matrix);
+
     radiant_buffer_write(uniform_buffer, sizeof(uniforms), &uniforms);
 
     WGPUCommandEncoderDescriptor cmd_desc = {
