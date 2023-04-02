@@ -197,7 +197,7 @@ int main() {
       .depthStencil = &depth_stencil,
       .multisample =
           {
-              .count = 1,
+              .count = 4,
               .mask = 0xffffffff,
           },
   };
@@ -251,11 +251,30 @@ int main() {
               .depthOrArrayLayers = 1,
           },
       .mipLevelCount = 1,
-      .sampleCount = 1,
+      .sampleCount = 4,
   };
   WGPUTexture depth_texture =
       wgpuDeviceCreateTexture(engine.device, &texture_desc);
 
+  // Create render texture
+  WGPUTextureDescriptor render_texture_desc = {
+      .label = "Render texture",
+      .usage = WGPUTextureUsage_RenderAttachment,
+      .dimension = WGPUTextureDimension_2D,
+      .format = WGPUTextureFormat_BGRA8Unorm,
+      .size =
+          {
+              .width = (uint32_t)view.size.width,
+              .height = (uint32_t)view.size.height,
+              .depthOrArrayLayers = 1,
+          },
+      .mipLevelCount = 1,
+      .sampleCount = 4,
+  };
+  WGPUTexture render_texture =
+      wgpuDeviceCreateTexture(engine.device, &render_texture_desc);
+
+  WGPUTextureView render_view = wgpuTextureCreateView(render_texture, NULL);
   WGPUBindGroupEntry bind_entries[] = {
       {
           .binding = 0,
@@ -310,7 +329,8 @@ int main() {
 
       WGPURenderPassColorAttachment colour_attach[] = {
           {
-              .view = backbuffer,
+              .view = render_view,
+              .resolveTarget = backbuffer,
               .loadOp = WGPULoadOp_Clear,
               .storeOp = WGPUStoreOp_Store,
               .clearValue =
