@@ -30,11 +30,6 @@ The `Force32` entry is added to force enums to 32-bits. Understandable
 but annoying with `Wswitch-enum` as you end up adding an empty `Force32`
 case statement. Don't know if this is fixable in another way.
 
-## Release of device causes device lost
-During cleanup, the `wgpuDeviceRelease` call triggers the `device_lost`
-callback. Have to remove the callback before releasing the device. It
-seems like an explicit release shouldn't be considered device lost?
-
 ## Surface creation is ...
 This is better on the C++ side, but doing surface creation in C involves
 a bit of hoop jumping (although the code is pretty much all boiler
@@ -55,9 +50,12 @@ Zero initializing structs, have to be very careful about default values, things 
 or the `ColorTargetState` `WriteMask` cause problems. At least with `multisample` a validation error
 is generated. With `WriteMask` set to `0` nothing renders.
 
+# Bugs Filed
+
 ## Confusing error message from DepthStencilState
 Leaving `stencilFront` or `stencilBack` as zero initializes gives error about `WGPUCompareFunction`
 but says while validating `depthStencil` which also has a compare function which was initialized.
+  * Filed https://bugs.chromium.org/p/dawn/issues/detail?id=1735
 
 # Resolved
 
@@ -76,4 +74,13 @@ required after something like a `wgpuCreateInstance` call
 #### Resolved
 kangz confirmed it is not required to `Retain` on creation as the
 objects are retained by default.
+
+## Release of device causes device lost
+During cleanup, the `wgpuDeviceRelease` call triggers the `device_lost`
+callback. Have to remove the callback before releasing the device. It
+seems like an explicit release shouldn't be considered device lost?
+
+### Resolved
+Kangz pointed out, that's what `WGPUDeviceLostReason_Destroyed` means. So, can just skip printing
+debug messages when received.
 
