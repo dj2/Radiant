@@ -4,14 +4,14 @@ Trying out things in WebGPU. This may not lead anywhere, it's mostly a playgroun
 with WebGPU native.
 
 ## Requirements
- * `depot_tools`
+ * `git`
  * `cmake`
  * `ninja`
  * `clang` or `gcc`
 
 ## Building
 ```
-gclient sync --jobs=16`
+git submodule update
 mkdir -p out/Debug
 cd out/Debug
 cmake -GNinja ../..
