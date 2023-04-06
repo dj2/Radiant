@@ -16,13 +16,9 @@
 
 #include <time.h>
 
-static const double NS_TO_MS = 1.0 / 1000000.0;
-
-radiant_time_diff_t radiant_time_sub(radiant_time_t mark1,
-                                     radiant_time_t mark2) {
-  return (mark2 > mark1) ? (mark2 - mark1) : (mark1 - mark2);
-}
-
-double radiant_time_diff_to_ms(radiant_time_diff_t diff) {
-  return NS_TO_MS * (double)diff;
+radiant_time_t radiant_time(void) {
+  struct timespec ts = {0};
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  return (radiant_time_t)(((uint64_t)ts.tv_sec * (uint64_t)1000000000UL) +
+                          (uint64_t)ts.tv_nsec);
 }

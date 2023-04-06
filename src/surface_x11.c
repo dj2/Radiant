@@ -10,6 +10,6 @@ radiant_surface_descriptor_t radiant_engine_create_x11_surface_descriptor(
               .sType = WGPUSType_SurfaceDescriptorFromXlibWindow,
           },
       .display = glfwGetX11Display(),
-      .window = glfwGetX11Window(window),
+      .window = (uint32_t)glfwGetX11Window(window),
   };
 }

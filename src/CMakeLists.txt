@@ -60,6 +60,7 @@ target_sources(libradiant PRIVATE
 
 if (APPLE)
   target_sources(libradiant PRIVATE
+    time_darwin.c
     surface_metal.h
     surface_metal.mm
   )
@@ -67,14 +68,16 @@ if (APPLE)
     "-framework Metal"
   )
 endif()
-if (UNIX AND !APPLE)
+if (UNIX AND NOT APPLE)
   target_sources(libradiant PRIVATE
+    time_linux.c
     surface_x11.h
     surface_x11.c
   )
 endif()
 if (WIN32)
   target_sources(libradiant PRIVATE
+    # Create a time_win32.c ....
     surface_win.h
     surface_win.c
   )
