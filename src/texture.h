@@ -17,7 +17,6 @@
 #include <stdint.h>
 
 #include "src/engine.h"
-#include "src/pad.h"
 #include "src/size.h"
 #include "src/wgpu.h"
 
@@ -26,7 +25,7 @@ typedef struct radiant_texture_create_request_t {
   const char* label;
   radiant_size_t size;
   uint32_t samples;
-  RADIANT_PAD(4);
+  WGPUTextureFormat format;
 } radiant_texture_create_request_t;
 
 typedef struct radiant_texture_t {

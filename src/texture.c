@@ -19,7 +19,7 @@ radiant_texture_t radiant_texture_create(radiant_texture_create_request_t req) {
       .label = req.label,
       .usage = WGPUTextureUsage_RenderAttachment,
       .dimension = WGPUTextureDimension_2D,
-      .format = WGPUTextureFormat_Depth24Plus,
+      .format = req.format,
       .size =
           {
               .width = req.size.width,

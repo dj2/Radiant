@@ -249,6 +249,7 @@ int main() {
   radiant_texture_create_request_t depth_texture_req = {
       .engine = engine,
       .label = "Depth Texture",
+      .format = WGPUTextureFormat_Depth24Plus,
       .size =
           {
               .width = (uint32_t)view.size.width,
@@ -262,6 +263,7 @@ int main() {
   radiant_texture_create_request_t render_texture_req = {
       .engine = engine,
       .label = "Render Texture",
+      .format = WGPUTextureFormat_BGRA8Unorm,
       .size =
           {
               .width = (uint32_t)view.size.width,
