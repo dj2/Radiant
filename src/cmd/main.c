@@ -39,10 +39,12 @@ typedef struct Uniforms {
   RADIANT_PAD(sizeof(radiant_mat4x4_t) - sizeof(uint32_t) - sizeof(float));
 } Uniforms;
 
-static struct vertices {
+typedef struct Vertex {
   radiant_point3_t pos;
   radiant_colour3_t colour;
-} vertex_data[] = {
+} Vertex;
+
+static Vertex pyramid_vertex_data[] = {
     {
         // 0
         .pos = (radiant_point3_t){.0f, .5f, .0f},
@@ -65,7 +67,7 @@ static struct vertices {
     },
 };
 
-static uint16_t index_data[] = {
+static uint16_t pyramid_index_data[] = {
     // clang-format off
     // Face 1
     0, 1, 2,
@@ -132,18 +134,18 @@ int main() {
   WGPUVertexAttribute vert_attrs[] = {
       {
           .format = WGPUVertexFormat_Float32x3,
-          .offset = offsetof(struct vertices, pos),
+          .offset = offsetof(Vertex, pos),
           .shaderLocation = 0,
       },
       {
           .format = WGPUVertexFormat_Float32x3,
-          .offset = offsetof(struct vertices, colour),
+          .offset = offsetof(Vertex, colour),
           .shaderLocation = 1,
       },
   };
   WGPUVertexBufferLayout vert_buf_layout[] = {
       {
-          .arrayStride = sizeof(struct vertices),
+          .arrayStride = sizeof(Vertex),
           .attributeCount = RADIANT_ARRAY_ELEMENT_COUNT(vert_attrs),
           .attributes = vert_attrs,
       },
@@ -215,20 +217,20 @@ int main() {
       .engine = engine,
       .usage = radiant_buffer_usage_vertex,
       .label = "Vertex data",
-      .size_in_bytes = sizeof(vertex_data),
+      .size_in_bytes = sizeof(pyramid_vertex_data),
   };
   radiant_buffer_t vertex_buffer =
-      radiant_buffer_create_with_data(vertex_buffer_req, vertex_data);
+      radiant_buffer_create_with_data(vertex_buffer_req, pyramid_vertex_data);
 
   // Create index buffer
   radiant_buffer_create_request_t index_buffer_req = {
       .engine = engine,
       .usage = radiant_buffer_usage_index,
       .label = "Index buffer",
-      .size_in_bytes = sizeof(index_data),
+      .size_in_bytes = sizeof(pyramid_index_data),
   };
   radiant_buffer_t index_buffer =
-      radiant_buffer_create_with_data(index_buffer_req, index_data);
+      radiant_buffer_create_with_data(index_buffer_req, pyramid_index_data);
 
   // Create Uniform Buffer
   Uniforms uniforms = {
@@ -377,7 +379,7 @@ int main() {
                                           WGPUIndexFormat_Uint16, 0,
                                           WGPU_WHOLE_SIZE);
       wgpuRenderPassEncoderDrawIndexed(
-          pass, RADIANT_ARRAY_ELEMENT_COUNT(index_data), 2, 0, 0, 0);
+          pass, RADIANT_ARRAY_ELEMENT_COUNT(pyramid_index_data), 2, 0, 0, 0);
       wgpuRenderPassEncoderEnd(pass);
 
       wgpuRenderPassEncoderRelease(pass);
