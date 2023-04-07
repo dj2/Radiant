@@ -42,6 +42,8 @@ target_sources(libradiant PRIVATE
   resource_manager.h
   shader.c
   shader.h
+  texture.c
+  texture.h
   time.c
   time.h
   vec2.c

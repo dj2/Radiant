@@ -23,6 +23,7 @@
 #include "src/point3.h"
 #include "src/resource_manager.h"
 #include "src/shader.h"
+#include "src/texture.h"
 #include "src/view.h"
 #include "src/window.h"
 
@@ -245,42 +246,33 @@ int main() {
       radiant_buffer_create_with_data(uniform_buffer_req, &uniforms);
 
   // Create depth texture
-  WGPUTextureDescriptor texture_desc = {
-      .label = "Depth texture",
-      .usage = WGPUTextureUsage_RenderAttachment,
-      .dimension = WGPUTextureDimension_2D,
-      .format = WGPUTextureFormat_Depth24Plus,
+  radiant_texture_create_request_t depth_texture_req = {
+      .engine = engine,
+      .label = "Depth Texture",
       .size =
           {
               .width = (uint32_t)view.size.width,
               .height = (uint32_t)view.size.height,
-              .depthOrArrayLayers = 1,
           },
-      .mipLevelCount = 1,
-      .sampleCount = 4,
+      .samples = 4,
   };
-  WGPUTexture depth_texture =
-      wgpuDeviceCreateTexture(engine.device, &texture_desc);
+  radiant_texture_t depth_texture = radiant_texture_create(depth_texture_req);
 
   // Create render texture
-  WGPUTextureDescriptor render_texture_desc = {
-      .label = "Render texture",
-      .usage = WGPUTextureUsage_RenderAttachment,
-      .dimension = WGPUTextureDimension_2D,
-      .format = WGPUTextureFormat_BGRA8Unorm,
+  radiant_texture_create_request_t render_texture_req = {
+      .engine = engine,
+      .label = "Render Texture",
       .size =
           {
               .width = (uint32_t)view.size.width,
               .height = (uint32_t)view.size.height,
-              .depthOrArrayLayers = 1,
           },
-      .mipLevelCount = 1,
-      .sampleCount = 4,
+      .samples = 4,
   };
-  WGPUTexture render_texture =
-      wgpuDeviceCreateTexture(engine.device, &render_texture_desc);
+  radiant_texture_t render_texture = radiant_texture_create(render_texture_req);
 
-  WGPUTextureView render_view = wgpuTextureCreateView(render_texture, NULL);
+  radiant_texture_view_t render_view =
+      radiant_texture_view_create(render_texture);
   WGPUBindGroupEntry bind_entries[] = {
       {
           .binding = 0,
@@ -343,7 +335,7 @@ int main() {
 
       WGPURenderPassColorAttachment colour_attach[] = {
           {
-              .view = render_view,
+              .view = render_view.view,
               .resolveTarget = backbuffer,
               .loadOp = WGPULoadOp_Clear,
               .storeOp = WGPUStoreOp_Store,
@@ -357,9 +349,10 @@ int main() {
           },
       };
 
-      WGPUTextureView depth_view = wgpuTextureCreateView(depth_texture, NULL);
+      radiant_texture_view_t depth_view =
+          radiant_texture_view_create(depth_texture);
       WGPURenderPassDepthStencilAttachment depth_attach = {
-          .view = depth_view,
+          .view = depth_view.view,
           .depthClearValue = 1.f,
           .depthLoadOp = WGPULoadOp_Clear,
           .depthStoreOp = WGPUStoreOp_Store,
@@ -386,7 +379,8 @@ int main() {
       wgpuRenderPassEncoderEnd(pass);
 
       wgpuRenderPassEncoderRelease(pass);
-      wgpuTextureViewRelease(depth_view);
+
+      radiant_texture_view_destroy(depth_view);
     }
 
     WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, NULL);
@@ -398,6 +392,10 @@ int main() {
 
     wgpuSwapChainPresent(engine.swapchain);
   }
+
+  radiant_texture_view_destroy(render_view);
+  radiant_texture_destroy(render_texture);
+  radiant_texture_destroy(depth_texture);
 
   wgpuRenderPipelineRelease(pipeline);
 
