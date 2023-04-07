@@ -11,6 +11,7 @@ with WebGPU native.
 
 ## Building
 ```
+git submodule init
 git submodule update
 mkdir -p out/Debug
 cd out/Debug
