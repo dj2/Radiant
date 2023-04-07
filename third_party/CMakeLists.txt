@@ -13,7 +13,6 @@
 # limitations under the License.
 
 set(DAWN_BUILD_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/gen)
-set(DAWN_THIRD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dawn/third_party)
 set(DAWN_BUILD_SAMPLES OFF)
 
 # Turn off some Dawn backends we aren't going to be using anywhere
